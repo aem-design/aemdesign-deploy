@@ -1,0 +1,17 @@
+---
+
+- name: selenium grid playbook
+  hosts: selenium-grid
+  vars_files:
+    - "{{inventory_dir}}/../group_vars/all/vars.yml"
+    - "{{inventory_dir}}/../group_vars/selenium-grid/vars.yml"
+
+  pre_tasks:
+    - include_role:
+        name: aem_design.docker_available
+    - include_role:
+        name: aem_design.docker_login
+
+  roles:
+    - role: selenium-grid
+

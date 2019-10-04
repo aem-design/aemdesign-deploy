@@ -1,0 +1,7 @@
+---
+
+- name: upload to maven {{ role_comment }}
+  command: curl -s -u {{ nexus_username }}:{{ nexus_password }} \
+            -X PUT --upload-file {{ fullfilepath }} \
+            {{ nexus_url }}
+  no_log: "{{ debug_hide }}"

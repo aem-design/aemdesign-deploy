@@ -1,0 +1,4 @@
+---
+
+#docker_command: -Dhostname=192.168.27.2 -Dport=4502 -DuploadImage.count=10 uploadImage
+docker_command: -Dhostname=192.168.27.2 -Dport=4502 -DuploadPdf.count=10 uploadPdf

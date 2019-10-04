@@ -1,0 +1,21 @@
+---
+
+- name: check if docker containers have access to internet
+  shell: docker run -i --rm alpine ping -c 1 -W 2 -4 -q google.com
+  register: ping_check
+  ignore_errors: yes
+  tags:
+    - localdev
+
+- name: does docker containers have access to internet
+  debug:
+    msg: "docker containers have internet access: {{ ping_check.stdout.find('1 packets received') != -1 }}"
+  tags:
+    - localdev
+
+- name: docker containers do not have internet access
+  fail:
+    msg: "docker containers do not have internet access: {{ ping_check.stdout.find('bad address ') != -1 }}"
+  when:
+    - ping_check.stdout.find('bad address ') != -1
+

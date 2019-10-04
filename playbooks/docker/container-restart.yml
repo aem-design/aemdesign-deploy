@@ -1,0 +1,67 @@
+---
+
+###############################################################
+## Stop containers
+###############################################################
+
+- name: stop aem containers
+  hosts: all
+  vars_files:
+    - "{{inventory_dir}}/../group_vars/all/vars.yml"
+  pre_tasks:
+  - shell: "docker ps --filter label=app.version='aem {{ service_aem_version | default('6.4.0') }}' --format '{{ '{{' }}.Names{{ '}}' }}'"
+    register: running_containers
+    become: yes
+  tasks:
+  - docker_container:
+      name: "{{ item }}"
+      state: stopped
+      stop_timeout: 3600
+      privileged: true
+    become: yes
+    with_items: "{{ running_containers.stdout_lines }}"
+  tags:
+    - container-stop
+    - container-aem-stop
+
+- name: stop non-aem containers
+  hosts: all
+  vars_files:
+    - "{{inventory_dir}}/../group_vars/all/vars.yml"
+  pre_tasks:
+  - shell: "docker ps --format '{{ '{{' }}.Names{{ '}}' }}'"
+    register: running_containers
+    become: yes
+  tasks:
+  - docker_container:
+      name: "{{ item }}"
+      state: stopped
+      privileged: true
+    become: yes
+    with_items: "{{ running_containers.stdout_lines }}"
+  tags:
+    - container-stop
+    - container-nonaem-stop
+
+
+###############################################################
+## Start containers
+###############################################################
+
+- name: start all containers
+  hosts: all
+  vars_files:
+    - "{{inventory_dir}}/../group_vars/all/vars.yml"
+  pre_tasks:
+  - shell: "docker ps -a --format '{{ '{{' }}.Names{{ '}}' }}'"
+    register: running_containers
+    become: yes
+  tasks:
+  - docker_container:
+      name: "{{ item }}"
+      state: started
+      privileged: true
+    become: yes
+    with_items: "{{ running_containers.stdout_lines }}"
+  tags:
+    - container-start

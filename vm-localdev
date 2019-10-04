@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# shellcheck disable=SC2034
+DIR_INC="$(cd .. && cd .. && pwd)/scripts"
+# shellcheck disable=SC2034
+DIR_ROOT="$(cd .. && cd .. && pwd)"
+
+if [[ -d $DIR_INC ]]; then
+
+    source $DIR_INC/functions.sh
+    doPythonCheck
+
+fi
+
+CURRDIR="$(pwd)"
+ANSIBLEPLAYBOOK=$(which ansible-playbook)
+ANSIBLE=$(which ansible)
+ANSIBLE_PLAYBOOK="vm-localdev.yml"
+ANSIBLE_INVENTORY="inventory/localdev"
+echo PARAMS="$@"
+echo CURRDIR=$CURRDIR
+cd $CURRDIR
+$ANSIBLE --version
+$ANSIBLEPLAYBOOK --version
+if [[ "" == "$@" ]]; then
+    echo $ANSIBLEPLAYBOOK $ANSIBLE_PLAYBOOK -i $ANSIBLE_INVENTORY
+    $ANSIBLEPLAYBOOK $ANSIBLE_PLAYBOOK -i $ANSIBLE_INVENTORY
+else
+    echo $ANSIBLEPLAYBOOK $ANSIBLE_PLAYBOOK -i $ANSIBLE_INVENTORY -e "$@"
+    $ANSIBLEPLAYBOOK $ANSIBLE_PLAYBOOK -i $ANSIBLE_INVENTORY -e "$@"
+fi

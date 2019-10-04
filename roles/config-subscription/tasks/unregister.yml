@@ -1,0 +1,26 @@
+---
+
+#- name: Unregister to RedHat Network
+#  redhat_subscription: state=absent
+#  when:
+#    - ansible_distribution == 'RedHat'
+#    - config_subscription_action is defined
+#    - config-subscription == "register"
+
+#subscription-manager remove --all
+#subscription-manager unregister
+#subscription-manager clean
+
+- name: unregister from redhat subscription manager
+  redhat_subscription:
+    state: absent
+    username: "{{ redhat_network_username }}"
+    password: "{{ redhat_network_password }}"
+  ignore_errors: true
+  register: redhat_unregister
+  changed_when: redhat_unregister.msg == 'System successfully unregistered from subscription.rhsm.redhat.com.'
+  become: yes
+  when:
+    - ansible_distribution == 'RedHat'
+    - config_subscription_action is defined
+    - config-subscription == "unregister"

@@ -1,0 +1,99 @@
+---
+
+all:
+  children:
+    localdev:
+      children:
+        author:
+    
+    author:
+      vars:
+        ansible_connection: local
+        aem_host: author01.aem.design
+      hosts:
+        author01.aem.design:
+        
+
+    publish:
+      vars:
+        ansible_connection: local
+        aem_host: publish01.aem.design
+      hosts:
+        publish01.aem.design:
+
+    dispatcher:
+      vars:
+        ansible_connection: local
+      hosts:
+        dispatcher01.aem.design:
+
+    dispatcher_publish:
+      vars:
+        ansible_connection: local
+      hosts:
+        dispatcher02.aem.design:
+
+    consul_client:
+      vars:
+        ansible_connection: local
+      hosts:
+        consul02.aem.design:
+
+    consul_server:
+      vars:
+        ansible_connection: local
+      hosts:
+        consul01.aem.design:
+
+    esb:
+      vars:
+        ansible_connection: local
+      hosts:
+        esb01.aem.design:
+
+    jenkins:
+      vars:
+        ansible_connection: local
+      hosts:
+        jenkins01.aem.design:
+
+    management:
+      vars:
+        ansible_connection: local
+      hosts:
+        man01.aem.design:
+
+    nexus:
+      vars:
+        ansible_connection: local
+      hosts:
+        nexus01.aem.design:
+    solr:
+      vars:
+        ansible_connection: local
+      hosts:
+        solr01.aem.design:
+
+    toughday:
+      vars:
+        ansible_connection: local
+      hosts:
+        toughday.aem.design:
+
+    selenium_grid:
+      vars:
+        ansible_connection: local
+      hosts:
+        seleniumgrid.aem.design:
+
+    selenium_grid_node_chrome:
+      vars:
+        ansible_connection: local
+      hosts:
+        seleniumgridnodechrome1.aem.design:
+
+    selenium_grid_node_firefox:
+      vars:
+        ansible_connection: local
+      hosts:
+        seleniumgridnodefirefox1.aem.design:

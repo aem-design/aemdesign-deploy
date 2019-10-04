@@ -1,0 +1,3 @@
+---
+
+docker_container_name: "publish01-{{ consul_environment }}"

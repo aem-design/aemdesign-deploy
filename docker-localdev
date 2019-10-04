@@ -1,0 +1,167 @@
+#!/bin/bash
+
+# shellcheck disable=SC2034
+DIR_INC="$(cd .. && cd .. && pwd)/scripts"
+# shellcheck disable=SC2034
+DIR_ROOT="$(cd .. && cd .. && pwd)"
+
+DEBUG=0
+
+if [[ ! -d "roles/aem_design.aem" ]]; then
+    echo "INSTALLING DEPENDENCIES"
+    ./install
+fi
+
+CURRDIR="$(pwd)"
+LOCAL_DOCKER_PORT=2376
+ANSIBLE_PLAYBOOK="docker-localdev.yml"
+ANSIBLE_INVENTORY="inventory/localdev-docker.yml"
+#ANSIBLE_INCLUDE_TAGS="docker-container,aem-packages,aem-verify,aem-install-package-using-ansible,aem-license"
+
+if [[ ! -z ${ANSIBLE_INCLUDE_TAGS} ]]; then
+    ANSIBLE_INCLUDE_TAGS="--tags=${ANSIBLE_INCLUDE_TAGS}"
+fi
+
+if [[ $DEBUG == 1 ]]; then
+  DEBUG_FLAG="-vvvv"
+fi
+
+DOCKER_CONTAINER="aemdesign/ansible-playbook"
+
+AUTHOR_ADDRESS="author01.aem.design"
+PUBLISH_ADDRESS="publish01.aem.design"
+PUBLISH_DISPATCHER_ADDRESS="dispatcher02.aem.design"
+SELENIUMGRID_ADDRESS="seleniumgrid.aem.design"
+SELENIUMGRIDCHROME1_ADDRESS="seleniumgridnodechrome1.aem.design"
+SELENIUM_PORT=32768
+
+SOCAT=$(which socat)
+
+if [[ -d $DIR_INC ]]; then
+
+    source $DIR_INC/functions.sh
+
+fi
+
+function checkSocat() {
+    if [[ "$SOCAT" == "" ]]; then
+        debug "Please install SOCAT before continuing" "error"
+        exit 1
+    else
+        debug "SOCAT already installed" "info"
+    fi
+}
+
+function checkDockerAPI() {
+    local DOCKER_HOST=$1
+    local DOCKER_PORT=$2
+
+
+    debug "CHECKING IF CONTAINERS HAVE ACCESS TO LOCAL DOCKER API" "warn"
+    debug " -> docker run -it --entrypoint=\"\" --rm $DOCKER_CONTAINER bash -c \"curl http://$DOCKER_HOST:$DOCKER_PORT/version\"" "info"
+    local STATUS=$(docker run -it --entrypoint="" --rm $DOCKER_CONTAINER bash -c "curl http://$DOCKER_HOST:$DOCKER_PORT/version")
+
+    if [[ "$STATUS" == *"Failed to connect"* ]]; then
+        debug "CONTAINERS DO NOT HAVE ACCESS TO LOCAL DOCKER API. UPDATING" "warn"
+        debug "socat TCP-LISTEN:$DOCKER_PORT,reuseaddr,fork UNIX-CONNECT:/var/run/docker.sock &" "info"
+        socat TCP-LISTEN:$DOCKER_PORT,reuseaddr,fork UNIX-CONNECT:/var/run/docker.sock &
+
+        STATUS=$(docker run -it --entrypoint="" --rm $DOCKER_CONTAINER bash -c "curl http://$DOCKER_HOST:$DOCKER_PORT/version")
+
+        if [[ "$STATUS" == *"Failed to connect"* ]]; then
+
+            debug "TRIED TO FIX BUT STILL NOT WORKING" "error"
+            debug "You need to be able to access your host Docker API in container" "error"
+            exit 1
+        fi
+    else
+        debug "CONTAINERS HAVE ACCESS TO LOCAL DOCKER API" "warn"
+    fi
+
+}
+
+function checkSelenium() {
+    local DOCKER_HOST=$1
+
+    debug "CHECKING IF SELENIUM HUB HAS BEEN CONFIGURED" "warn"
+    debug " -> docker run -it --entrypoint=\"\" --rm $DOCKER_CONTAINER bash -c \"curl http://$DOCKER_HOST:$SELENIUM_PORT/wd/hub/status\"" "info"
+    local STATUS=$(docker run -it --entrypoint="" --rm $DOCKER_CONTAINER bash -c "curl http://$DOCKER_HOST:$SELENIUM_PORT/wd/hub/status")
+
+    if [[ "$STATUS" == *"status"* ]]; then
+        debug "Selenium Grid has been configured and is ready" "warn"
+    else
+        debug "Selenium Grid is not configured" "error"
+    fi
+
+}
+function startDockerPlaybook() {
+    local DOCKER_HOST=$1
+    local DOCKER_PORT=$2
+
+
+    #TODO: add port to allow selenium access on local ip
+    #socat TCP-LISTEN:32768,reuseaddr,fork,su=nobody TCP:proxy:32768
+
+    debug "RUNNING PLAYBOOK IN DOCKER CONTAINER" "warn"
+    debug "\
+    docker run -it --rm \
+    -v $(pwd):/ansible/playbooks \
+    --add-host $AUTHOR_ADDRESS:$DOCKER_HOST \
+    --add-host $PUBLISH_ADDRESS:$DOCKER_HOST \
+    --add-host $PUBLISH_DISPATCHER_ADDRESS:$DOCKER_HOST \
+    --add-host $SELENIUMGRID_ADDRESS:$DOCKER_HOST \
+    --add-host $SELENIUMGRIDCHROME1_ADDRESS:$DOCKER_HOST \
+    -e AEM_NAME \
+    -e AEM_KEY \
+    -e ADOBECLOUD_USERNAME \
+    -e ADOBECLOUD_PASSWORD \
+    $DOCKER_CONTAINER \
+    bash -c \"export ANSIBLE_LIBRARY=./library && \\
+                ansible-playbook \\
+                $DEBUG_FLAG \\
+                $ANSIBLE_PLAYBOOK \\
+                -i $ANSIBLE_INVENTORY \\
+                --extra-vars "service_aem_host=$LOCAL_IP" \\
+                $ANSIBLE_INCLUDE_TAGS \\
+                -e docker_host=tcp://$DOCKER_HOST:$DOCKER_PORT\"" "info"
+
+    docker run -it --rm \
+    -v $(pwd):/ansible/playbooks \
+    --add-host $AUTHOR_ADDRESS:$DOCKER_HOST \
+    --add-host $PUBLISH_ADDRESS:$DOCKER_HOST \
+    --add-host $PUBLISH_DISPATCHER_ADDRESS:$DOCKER_HOST \
+    --add-host $SELENIUMGRID_ADDRESS:$DOCKER_HOST \
+    --add-host $SELENIUMGRIDCHROME1_ADDRESS:$DOCKER_HOST \
+    -e AEM_NAME \
+    -e AEM_KEY \
+    -e ADOBECLOUD_USERNAME \
+    -e ADOBECLOUD_PASSWORD \
+    $DOCKER_CONTAINER \
+    bash -c "export ANSIBLE_LIBRARY=./library && \\
+                ansible-playbook \\
+                $DEBUG_FLAG \\
+                $ANSIBLE_PLAYBOOK \\
+                -i $ANSIBLE_INVENTORY \\
+                --extra-vars "service_aem_host=$LOCAL_IP" \\
+                $ANSIBLE_INCLUDE_TAGS \\
+                -e docker_host=tcp://$DOCKER_HOST:$DOCKER_PORT"
+}
+
+function main() {
+
+    SCRIPT_PARAMS="$@"
+
+    if [[ "$SCRIPT_PARAMS" =~ *"debug"* ]]; then
+        DEBUG=1
+    fi
+
+    checkSocat
+
+    checkDockerAPI "$LOCAL_IP" "$LOCAL_DOCKER_PORT"
+
+    startDockerPlaybook "$LOCAL_IP" "$LOCAL_DOCKER_PORT"
+
+    checkSelenium "$LOCAL_IP"
+}
+
+main "$@"

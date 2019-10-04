@@ -1,0 +1,73 @@
+---
+
+- set_fact:
+    role_comment: "( docker-host )"
+
+#- name: templating docker network config {{ role_comment }}
+#  template:
+#     src="docker-network.default.j2"
+#     dest="{{ docker_network_config }}"
+#  become: yes
+#  tags:
+#    - docker-network-configure
+
+#- name: templating docker daemon config {{ role_comment }}
+#  template:
+#     src="docker.{{ docker_daemon_template }}.j2"
+#     dest="{{ docker_config }}"
+#  become: yes
+#  tags:
+#    - docker-network-configure
+
+- name: templating docker daemon config for atomic {{ role_comment }}
+  template:
+     src="docker.atomic.{{ docker_daemon_template }}.j2"
+     dest="{{ docker_config }}"
+  become: yes
+  tags:
+    - docker-network-configure
+
+#- name: templating docker registries config for atomic {{ role_comment }}
+#  template:
+#     src="docker.registries.{{ docker_daemon_template }}.j2"
+#     dest="{{ docker_registries_config }}"
+#  become: yes
+#  tags:
+#    - docker-network-configure
+
+#- name: templating docker daemon config json for docker-ce {{ role_comment }}
+#  template:
+#     src="docker.json.{{ docker_daemon_template }}.j2"
+#     dest="{{ docker_config_json }}"
+#  become: yes
+#  tags:
+#    - docker-network-configure
+#
+- name: templating hosts file {{ role_comment }}
+  template:
+     src=hosts.j2
+     dest="{{ hosts_config }}"
+  become: yes
+  tags:
+    - docker-host-network-configure
+
+#- name: remove default docker daemon json {{ role_comment }}
+#  file:
+#    path: "{{ docker_config_json }}"
+#    state: absent
+#  become: yes
+
+- name: update host network iptables {{ role_comment }}
+  include_role:
+    name: aem_design.config_iptables
+  tags:
+    - host-config
+
+- name: restart docker service {{ role_comment }}
+  service:
+    name: docker
+    state: restarted
+  become: yes
+  tags:
+    - docker-network-configure
+

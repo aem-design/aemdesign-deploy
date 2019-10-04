@@ -1,0 +1,14 @@
+---
+
+
+consul_network_name: consul-net
+consul_environment: dev
+
+aem_runmode: "author,crx3,crx3tar,dev,nosamplecontent"
+aem_jvm_opts: "-server -Xms16384m -Xmx24576m -XX:MaxDirectMemorySize=1024m -XX:+CMSClassUnloadingEnabled -Djava.awt.headless=true"
+
+docker_ipam_options:
+  subnet: '172.10.0.0/16'
+  gateway: '172.10.0.1'
+  iprange: '172.10.1.0/24'
+

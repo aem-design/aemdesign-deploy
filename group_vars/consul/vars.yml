@@ -1,0 +1,29 @@
+---
+# file: group_vars/consul
+
+
+#consule config
+service_consul_dns_port: 8600
+service_consul_server_port: 8300
+service_consul_serf_lan_port: 8301
+service_consul_serf_wan_port: 8302
+service_consul_http_port: 8500
+service_consul_https_port: 8400
+service_consul_advertise_port: 2375
+service_consul_environment: localdev
+service_consul_dns_primary: 10.72.36.65                                                           # IP address of the consul DNS. Docker network will be configured to this.
+service_consul_dns_secondary: 10.72.76.85
+service_consul_netip:  172.10.0.2
+service_consul_bind_ip: "{{ ansible_host }}"                        # Host IP to bind consul services
+service_consul_host: "{{ ansible_host }}"
+service_consul_network_name: consul-net                             # Docker network for consul servers and agents
+
+
+iptable_rules:
+    - port: "22"
+    - port: "53"
+    - port: "161"
+    - port: "8400"
+    - port: "8500"
+    - port: "8600"
+    - port: "2375"

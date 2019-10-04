@@ -1,0 +1,10 @@
+---
+# file: group_vars/mongodb
+
+iptable_rules:
+    - port: "22"
+    - port: "161"
+    - port: "27017"
+    - port: "28017"
+
+consul_service_name: "{{ docker_container_name }}"

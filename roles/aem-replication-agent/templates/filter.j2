@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workspaceFilter version="1.0">
+    {% for item in replication_agents %}
+    <filter root="/etc/replication/agents.author/{{ item.name }}"/>
+    {% endfor %}
+</workspaceFilter>

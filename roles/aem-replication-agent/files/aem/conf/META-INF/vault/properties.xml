@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>FileVault Package Properties</comment>
+<entry key="name">aem-replication-agents</entry>
+<entry key="version">1.0.0</entry>
+<entry key="description">AEM Replication Agents Package</entry>
+<entry key="group">AEM.Design</entry>
+</properties>

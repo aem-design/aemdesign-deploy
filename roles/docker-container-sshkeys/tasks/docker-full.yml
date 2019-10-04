@@ -1,0 +1,51 @@
+---
+
+- name: Add to SSH config
+  shell:  "docker exec --user={{ DOCKER_SSHKEYS_USER }} {{ DOCKER_CONTAINER }} bash -c \"{{ item }}\""
+  become: yes
+  become_method: sudo
+  with_items:
+    - "echo '{{ lookup('file', ssh.gitlab_ssh_config ) }}' > {{ DOCKER_SSHKEYS_HOME }}/{{ ssh.gitlab_ssh_config_dest }}"
+  tags:
+    - add-sshkey
+
+  # add all of the available keys from vm project to a docker container
+- name: Copy Keys into Docker container
+  shell: "docker cp /home/{{ ansible_ssh_user }}/{{ item }} {{ DOCKER_CONTAINER }}:{{ DOCKER_SSHKEYS_PATH }}"
+  become: yes
+  become_method: sudo
+  with_items:
+    - "{{ ssh_container.private_key }}"
+    - "{{ ssh_container.public_key }}"
+    - "{{ ssh_container.private_dsa_key }}"
+    - "{{ ssh_container.public_dsa_key }}"
+    - "{{ ssh_container.gitlab_private_key }}"
+    - "{{ ssh_container.gitlab_public_key }}"
+    - "{{ ssh_container.devops_private_key }}"
+    - "{{ ssh_container.devops_public_key }}"
+    - "{{ ssh_container.jenkins_private_key }}"
+    - "{{ ssh_container.jenkins_public_key }}"
+    - "{{ ssh_container.authorized_keys_src }}"
+  tags:
+    - add-sshkey
+
+- name: Protect private Keys in container
+  shell:  "docker exec --user=root {{ DOCKER_CONTAINER }} bash -c \"chmod -R 600 {{ item }}\""
+  become: yes
+  become_method: sudo
+  with_items:
+    - "{{ DOCKER_SSHKEYS_HOME }}/{{ ssh.private_key_dest }}"
+    - "{{ DOCKER_SSHKEYS_HOME }}/{{ ssh.private_dsa_key_dest }}"
+    - "{{ DOCKER_SSHKEYS_HOME }}/{{ ssh.gitlab_private_key_dest }}"
+    - "{{ DOCKER_SSHKEYS_HOME }}/{{ ssh.devops_private_key_dest }}"
+    - "{{ DOCKER_SSHKEYS_HOME }}/{{ ssh.jenkins_private_key_dest }}"
+  tags:
+    - add-sshkey
+
+- name: Apply Permissions to Keys in container
+  command:  "docker exec --user root {{ DOCKER_CONTAINER }} bash -c \"chown -R {{ DOCKER_SSHKEYS_USER }}:{{ DOCKER_SSHKEYS_GROUP }} {{ DOCKER_SSHKEYS_PATH }}\""
+  become: yes
+  become_method: sudo
+  tags:
+    - add-sshkey
+

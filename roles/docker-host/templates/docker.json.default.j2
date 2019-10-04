@@ -1,0 +1,13 @@
+{
+  "selinux-enabled": true,
+  "tls": false,
+  "live-restore": true,
+  "storage-driver": "local",
+  "hosts": ["tcp://0.0.0.0:4243","unix:///var/run/docker.sock"],
+  "insecure-registries" : ["{{ docker_registry_url }}","{{ docker_registry_mirror_url }}","{{ docker_registry_group_url }}"],
+  "registry-mirrors": ["{{ docker_registry_url }}","{{ docker_registry_mirror_url }}","{{ docker_registry_group_url }}"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  }
+}

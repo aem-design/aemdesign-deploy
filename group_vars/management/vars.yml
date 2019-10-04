@@ -1,0 +1,12 @@
+---
+
+docker_volume_group: dockervg
+
+consul_environment: management
+
+consul_network_name: consul-net
+
+docker_ipam_options:
+  subnet: '172.10.0.0/16'
+  gateway: '172.10.0.1'
+  iprange: '172.10.1.0/24'

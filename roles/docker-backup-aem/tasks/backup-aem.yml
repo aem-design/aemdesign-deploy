@@ -1,0 +1,16 @@
+---
+
+#- debug: msg="{{ aem_port }}"
+
+- name: post delay to AEM
+  shell: "curl -s -u {{ aem_username }}:{{ aem_password }} -X POST http://{{ inventory_hostname }}:{{ aem_port }}/system/console/jmx/com.adobe.granite%3Atype%3DRepository/a/BackupDelay?value=0"
+
+- name: post backup to author
+  shell: "curl -s -u {{ aem_username }}:{{ aem_password }} -X POST http://{{ inventory_hostname }}:{{ aem_port }}/system/console/jmx/com.adobe.granite%3Atype%3DRepository/op/startBackup/java.lang.String?target=/backup/daily/"
+  when: >
+     ("4502" in (AEM_PORT|string))
+
+- name: post backup to publish
+  shell: "curl -s -u {{ aem_username }}:{{ aem_password }} -X POST http://{{ inventory_hostname }}:{{ aem_port }}/system/console/jmx/com.adobe.granite%3Atype%3DRepository/op/startBackup/java.lang.String?target=/backup/daily.zip"
+  when: >
+     ("4503" in (AEM_PORT|string))

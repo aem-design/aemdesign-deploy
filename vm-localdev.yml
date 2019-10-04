@@ -1,0 +1,20 @@
+---
+# file: localdev.yml
+
+- name: aemdesign local vm config
+  hosts: aemdesign_vm
+  pre_tasks:
+    - include_role:
+        name: common
+    - include_role:
+        name: docker-host
+    - include_role:
+        name: localdev
+
+- import_playbook: playbooks/service/nexus.yml
+
+- import_playbook: playbooks/operation/configure-vm-content.yml
+
+- import_playbook: playbooks/service/jenkins.yml
+
+

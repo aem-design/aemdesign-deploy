@@ -1,0 +1,9 @@
+---
+- hosts: sshhost
+  vars_files:
+    - "{{inventory_dir}}/../group_vars/all/vars.yml"
+  become: yes
+  become_method: sudo
+  roles:
+    - common
+    - security-rotate-keys

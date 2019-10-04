@@ -1,0 +1,104 @@
+---
+
+- name: author teardown
+  hosts: author
+  pre_tasks:
+    - name: removing docker author containers
+      docker_container:
+        name: "{{ docker_container_name }}"
+        state: absent
+      become: yes
+    - name: monitoring log for aem author shutdown
+      wait_for:
+        host: "{{ aem_host }}"
+        port: "{{ aem_port }}"
+        delay: 10
+        state: stopped
+  roles:
+  - role: config-logical-volume-remove
+
+- name: publish teardown
+  hosts: publish
+  pre_tasks:
+    - name: removing docker publish containers
+      docker_container:
+        name: "{{ docker_container_name }}"
+        state: absent
+      become: yes
+    - name: monitoring log for aem publish shutdown
+      wait_for:
+        host: "{{ aem_host }}"
+        port: "{{ aem_port }}"
+        delay: 10
+        state: stopped
+  roles:
+  - role: config-logical-volume-remove
+
+- name: dispatcher author teardown
+  hosts: dispatcher
+  pre_tasks:
+    - name: removing docker dispatcher author containers
+      docker_container:
+        name: "{{ docker_container_name }}"
+        state: absent
+      become: yes
+    - name: monitoring log for dispatcher author shutdown
+      wait_for:
+        host: "{{ container_dispatcher_host }}"
+        port: "{{ container_dispatcher_port }}"
+        delay: 10
+        state: stopped
+  roles:
+  - role: config-logical-volume-remove
+
+- name: dispatcher publish teardown
+  hosts: dispatcher-publish
+  pre_tasks:
+    - name: removing docker dispatcher publish containers
+      docker_container:
+        name: "{{ docker_container_name }}"
+        state: absent
+      become: yes
+    - name: monitoring log for dispatcher publish shutdown
+      wait_for:
+        host: "{{ container_dispatcher_host }}"
+        port: "{{ container_dispatcher_port }}"
+        delay: 10
+        state: stopped
+  roles:
+  - role: config-logical-volume-remove
+
+
+- name: solr teardown
+  hosts: solr
+  pre_tasks:
+    - name: removing docker solr containers
+      docker_container:
+        name: "{{ container_solr_name }}"
+        state: absent
+      become: yes
+    - name: monitoring log for solr shutdown
+      wait_for:
+        host: "{{ container_solr_host_ip }}"
+        port: "{{ container_solr_host_port }}"
+        delay: 10
+        state: stopped
+  roles:
+  - role: config-logical-volume-remove
+
+- name: esb teardown
+  hosts: esb
+  pre_tasks:
+    - name: removing docker esb containers
+      docker_container:
+        name: "{{ docker_container_name }}"
+        state: absent
+      become: yes
+    - name: monitoring log for esb shutdown
+      wait_for:
+        host: "{{ container_esb_host_ip }}"
+        port: "{{ container_esb_host_port }}"
+        delay: 10
+        state: stopped
+  roles:
+  - role: config-logical-volume-remove

@@ -1,0 +1,112 @@
+---
+
+docker_cluster_store: consul://consul.service.dc1.consul:8500
+docker_cluster_advertise: 10.72.76.85:2375
+docker_daemon_template: cluster
+
+consul_bind_ip: 10.72.76.85
+consul_dns_primary: 10.72.36.65
+consul_dns_secondary: 8.8.4.4
+
+iptable:
+  rules:
+    - chain: INPUT
+      protocol: tcp
+      match: tcp
+      port: 5000
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: tcp
+      match: tcp
+      port: 8922
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: tcp
+      match: tcp
+      port: 8980
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: tcp
+      match: tcp
+      port: 8943
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: tcp
+      match: tcp
+      port: 53
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: udp
+      match: udp
+      port: 53
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: tcp
+      match: tcp
+      port: 8300
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: tcp
+      match: tcp
+      port: 8301
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: udp
+      match: udp
+      port: 8301
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: tcp
+      match: tcp
+      port: 8302
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: udp
+      match: udp
+      port: 8302
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: tcp
+      match: tcp
+      port: 8500
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: tcp
+      match: tcp
+      port: 80
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: tcp
+      match: tcp
+      port: 8080
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: tcp
+      match: tcp
+      port: 8081
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: tcp
+      match: tcp
+      port: 2375
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: tcp
+      match: tcp
+      port: 2377
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: udp
+      match: udp
+      port: 4789
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: tcp
+      match: tcp
+      port: 7946
+      jump_target: ACCEPT
+    - chain: INPUT
+      protocol: udp
+      match: udp
+      port: 7946
+      jump_target: ACCEPT

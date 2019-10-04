@@ -1,0 +1,10 @@
+---
+# file: group_vars/jenkins
+
+#jenkins
+service_jenkins_http_port: 8080
+service_jenkins_agent_port: 50000
+service_jenkins_address: "{{ localdev_address }}"
+
+consul_service_name: "{{ docker_container_name }}"
+service_jvm_opts: "-Dhudson.security.HudsonPrivateSecurityRealm.ID_REGEX=[a-zA-Z0-9_.@-]+" #allow more chars in user id

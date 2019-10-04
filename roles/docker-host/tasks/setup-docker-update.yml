@@ -1,0 +1,37 @@
+---
+
+- name: stop and diable docker {{ role_comment }}
+  systemd:
+    name: docker
+    enabled: no
+    masked: no
+    state: stopped
+  become: yes
+  tags:
+    - docker-daemon-configure
+
+- name: start and enable docker latest {{ role_comment }}
+  systemd:
+    name: docker-latest
+    enabled: yes
+    masked: no
+    state: started
+  become: yes
+  tags:
+    - docker-daemon-configure
+
+- name: update docker config with docker latest {{ role_comment }}
+  lineinfile:
+    destfile: "{{ docker_config }}"
+    line: "{{ item.name }}={{ item.value }}"
+    state: present
+    insertafter: EOF
+    backup: yes
+  become: yes
+  become_user: root
+  become_method: sudo
+  with_items:
+    - { name: "DOCKERBINARY", value: "/usr/bin/docker-latest" }
+  tags:
+    - docker-daemon-configure
+

@@ -1,0 +1,13 @@
+---
+# file: operation/restart-author.yml
+
+- hosts: "{{ hosts|default('dockerhost') }}"
+  vars_files:
+    - "{{inventory_dir}}/../group_vars/all/vars.yml"
+  become: yes
+  become_method: sudo
+  gather_facts: false
+  tasks:
+    docker_container:
+      name: "author"
+      state: "restarted"

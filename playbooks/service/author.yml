@@ -1,0 +1,54 @@
+---
+
+- name: author playbook
+  hosts: author
+  vars_files:
+    - "{{ inventory_dir }}/../group_vars/all/vars.yml"
+    - "{{ inventory_dir }}/../group_vars/author/vars.yml"
+
+  tasks:
+    - name: run aem author istance
+      include_role:
+        name: aem_design.aem
+      vars:
+        aem_port: "{{ service_author_port | default(service_aem_port) }}"
+        aem_runmode: "{{ service_author_runmode | default(service_aem_runmode) }}"
+        aem_jvm_opts: "{{ service_author_jvm_opts | default(service_aem_jvm_opts) }}"
+        aem_start_opts: "{{ service_author_start_opts | default(service_aem_start_opts) }}"
+        docker_container_name: "author"
+        docker_volumes: [
+          "author-repository:/aem/crx-quickstart/repository:z",
+          "author-logs:/aem/crx-quickstart/logs:z",
+          "author-backup:/aem/backup:z"
+        ]
+        docker_published_ports: [
+          "0.0.0.0:{{ service_author_port }}:8080/tcp",
+          "0.0.0.0:{{ service_author_debug_port }}:58242/tcp",
+          "0.0.0.0:{{ service_author_imageserver_port }}:57345/tcp"
+        ]
+    - name: ensure container is registered
+      include_role:
+        name: aem_design.aem_license
+      vars:
+        aem_license_name: "{{ service_aem_license_name }}"
+        aem_license_key: "{{ service_aem_license_key }}"
+    - name: ensure instance is ready
+      include_role:
+        name: aem_design.aem_verify
+    - name: install aem packages
+      include_role:
+        name: aem_design.aem_package
+      vars:
+        maven_repository_url: "{{ item.maven_repository_url | default('') }}"
+        simple_name: "{{ item.simple_name }}"
+        group_name: "{{ item.group_name }}"
+        package_version: "{{ item.package_version }}"
+        package_name: "{{ item.package_name }}"
+        package_url: "{{ item.package_url }}"
+        file_name: "{{ item.file_name }}"
+        file_url_username: "{{ service_adobe_cloud_username }}"
+        file_url_password: "{{ service_adobe_cloud_password }}"
+        install_package_ansible: false
+        install_package_docker: true
+      loop: "{{ package_files }}"
+

@@ -1,0 +1,36 @@
+---
+
+- name: consul playbook
+  hosts: consul-server
+  vars_files:
+    - "{{inventory_dir}}/../group_vars/all/vars.yml"
+    - "{{inventory_dir}}/../group_vars/consul-server/vars.yml"
+
+  pre_tasks:
+    - include_role:
+        name: aem_design.docker_available
+    - include_role:
+        name: aem_design.docker_login
+    - name: create docker network
+      docker_network:
+        name: "{{ consul_network_name }}"
+        driver: "{{ docker_consul_net_driver }}"
+        ipam_options: "{{ docker_ipam_options }}"
+      become: yes
+      tags:
+        - docker-network-create
+
+  tasks: []
+
+  roles:
+  - name: configuring consul servers
+    role: consul-server
+    tags:
+      - consul-server
+
+
+
+
+  post_tasks: []
+
+  handlers: []

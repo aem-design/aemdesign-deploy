@@ -1,0 +1,129 @@
+# file: localdev
+---
+###########################
+# HOSTS
+###########################
+
+all:
+  vars:
+    ansible_connection: ssh
+    ansible_ssh_user: aemdesign
+    ansible_ssh_private_key_file: {{ inventory_dir  }}/../../aemdesign-vm/keys/current/aemdesign
+  children:
+    localdev:
+      children:
+        consul_client
+        consul_server
+        esb
+        author
+        publish
+        dispatcher
+        dispatcher_publish
+        solr
+        jenkins
+        nexus
+        selenium_grid
+        selenium_grid_node_chrome
+        selenium_grid_node_firefox
+
+    aemdesign_vm:
+      hosts:
+        192.168.27.2:
+    
+    docker_host:
+      vars:
+        ansible_host: "192.168.27.2"
+      hosts:
+        192.168.27.2:
+
+    author:
+      vars:
+        ansible_host: "192.168.27.2"
+        aem_host: author01.aem.design
+      hosts:
+        author01.aem.design:
+        
+
+    publish:
+      vars:
+        ansible_host: "192.168.27.2"
+        aem_host: publish01.aem.design
+      hosts:
+        publish01.aem.design:
+
+    dispatcher:
+      vars:
+        ansible_host: "192.168.27.2"
+      hosts:
+        dispatcher01.aem.design:
+
+    dispatcher_publish:
+      vars:
+        ansible_host: "192.168.27.2"
+      hosts:
+        dispatcher02.aem.design:
+
+    consul_client:
+      vars:
+        ansible_host: "192.168.27.2"
+      hosts:
+        consul02.aem.design:
+
+    consul_server:
+      vars:
+        ansible_host: "192.168.27.2"
+      hosts:
+        consul01.aem.design:
+
+    esb:
+      vars:
+        ansible_host: "192.168.27.2"
+      hosts:
+        esb01.aem.design:
+
+    jenkins:
+      vars:
+        ansible_host: "192.168.27.2"
+      hosts:
+        jenkins01.aem.design:
+
+    management:
+      vars:
+        ansible_host: "192.168.27.2"
+      hosts:
+        man01.aem.design:
+
+    nexus:
+      vars:
+        ansible_host: "192.168.27.2"
+      hosts:
+        nexus01.aem.design:
+    solr:
+      vars:
+        ansible_host: "192.168.27.2"
+      hosts:
+        solr01.aem.design:
+
+    toughday:
+      vars:
+        ansible_host: "192.168.27.2"
+      hosts:
+        toughday.aem.design:
+
+    selenium_grid:
+      vars:
+        ansible_host: "192.168.27.2"
+      hosts:
+        seleniumgrid.aem.design:
+
+    selenium_grid_node_chrome:
+      vars:
+        ansible_host: "192.168.27.2"
+      hosts:
+        seleniumgridnodechrome1.aem.design:
+
+    selenium_grid_node_firefox:
+      vars:
+        ansible_host: "192.168.27.2"
+      hosts:
+        seleniumgridnodefirefox1.aem.design:

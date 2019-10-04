@@ -1,0 +1,82 @@
+---
+
+- name: creating content package folder
+  file:
+    path=aem_conf/jcr_root/etc/replication/agents.author/{{item.name}} state=directory
+  with_items:
+    - "{{ replication_agents }}"
+  tags:
+    - aem-configure
+
+- name: creating replication agent content
+  template:
+    src=replication-agent.j2
+    dest=aem_conf/jcr_root/etc/replication/agents.author/{{item.name}}/.content.xml
+  with_items:
+    - "{{ replication_agents }}"
+  tags:
+  - aem-configure
+
+- name: copying META-INF
+  synchronize:
+    src=aem/conf/META-INF
+    dest=aem_conf
+  with_items:
+    - "{{ replication_agents }}"
+  tags:
+  - aem-configure
+
+- name: template filter.xml
+  template:
+    src=filter.j2
+    dest=aem_conf/META-INF/vault/filter.xml
+  become: yes
+  tags:
+  - aem-configure
+
+- name: aem creating package with replication agents
+  command: zip -r {{ replication_agents_package_name }}-{{replication_agents_package_version}}.zip . chdir=aem_conf
+  tags:
+  - aem-configure
+
+- name: wait until aem login page is ready
+  action: aem_login_ready
+    url=http://{{ aem_host }}:{{ aem_port }}
+  register: result
+  until: result is success
+  retries: 360
+  delay: 5
+  tags:
+    - aem-verify
+
+- name: aem uploading replication agent package
+  action: aem_upload_package
+    host={{ aem_host }}
+    port={{ aem_port }}
+    group_name=aem_config
+    package_name={{ replication_agents_package_name }}
+    package_version={{replication_agents_package_version}}
+    file_path=aem_conf
+    aem_username={{ aem_username }}
+    aem_password={{ aem_password }}
+  tags:
+  - aem-configure
+
+- name: installing replication agent package
+  action: aem_install_package
+    host={{ aem_host }}
+    port={{ aem_port }}
+    group_name=aem_config
+    package_name={{ replication_agents_package_name }}
+    package_version={{replication_agents_package_version}}
+    aem_username={{ aem_username }}
+    aem_password={{ aem_password }}
+  tags:
+    - aem-configure
+
+- name: removing aem configuration directory
+  file:
+    path=aem_conf
+    state=absent
+  tags:
+    - aem-configure

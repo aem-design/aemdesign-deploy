@@ -1,0 +1,36 @@
+---
+
+
+
+consul_config_path: /var/consul                                 # Path to mount the volume to the host
+consul_net_ip: "{{ service_consul_netip | default('172.10.0.2') }}"                     # IP to assign to consul
+consul_bind_ip: "{{ ansible_host | default('192.168.27.2') }}"  # IP to bind the consul container in the host
+consul_bootstrap_expect: 1                                      # Number of servers in the cluster
+consul_host: "{{ service_consul_host | default( ansible_host ) }}"
+consul_http_port: "{{ service_consul_http_port | default('8500') }}"
+consul_service_name: "consul"
+
+consul_opts: ""
+
+docker_container_name: "consul-server"
+docker_image: "consul"
+docker_image_tag: "latest"
+docker_command: "consul agent -server -data-dir /consul/data -node {{ consul_bind_ip }} -advertise={{ consul_bind_ip }} -bind={{ consul_bind_ip }} -client={{ consul_bind_ip }} -bootstrap-expect {{ consul_bootstrap_expect }} -recursor {{ dns_primary }} -recursor {{ dns_secondary }} {{ consul_opts }}"
+docker_labels: "CONSUL_SERVICE_IP={{ consul_bind_ip }}"
+docker_timezone: "Australia/Melbourne"                                                  # timezone
+
+docker_published_ports:
+  - "{{ consul_bind_ip }}:53:8600/tcp"
+  - "{{ consul_bind_ip }}:53:8600/udp"
+  - "{{ consul_bind_ip }}:8300:8300/tcp"
+  - "{{ consul_bind_ip }}:8301:8301/tcp"
+  - "{{ consul_bind_ip }}:8301:8301/udp"
+  - "{{ consul_bind_ip }}:8302:8302/tcp"
+  - "{{ consul_bind_ip }}:8302:8302/udp"
+  - "{{ consul_bind_ip }}:8400:8400/tcp"
+  - "{{ consul_bind_ip }}:8500:8500/tcp"
+
+docker_volumes:
+  - "{{ consul_config_path }}:/consul:z"
+
+docker_host: "unix://var/run/docker.sock"    # host where to run the docker container

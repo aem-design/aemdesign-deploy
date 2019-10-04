@@ -1,0 +1,7 @@
+---
+# file: group_vars/selenium-grid
+
+#selenium hub
+service_selenium_grid_http_port: 32768
+service_selenium_grid_timeout: 10
+service_selenium_grid_name: "selenium-grid"

@@ -1,0 +1,65 @@
+---
+
+- set_fact:
+    role_file_source: "{{ role_path }}/files/docker/"
+    role_comment: "( {{ docker_container_name | default('consul') }} )"
+
+- name: create config directory
+  file:
+    path="{{ consul_config_path }}/config"
+    state=directory
+  become: yes
+
+- name: start docker container consul server
+  docker_container:
+    name: "{{ docker_container_name }}"
+    image: "{{ docker_image }}:{{ docker_image_tag }}"
+    state: started
+    restart_policy: unless-stopped
+    labels:
+      "CONSUL_SERVICE_IP={{ consul_bind_ip }}"
+    volumes: "{{ docker_volumes }}"
+    command: "consul agent -server -data-dir /consul/data -node {{ consul_bind_ip }} -advertise={{ consul_bind_ip }} -bind=0.0.0.0 -client=0.0.0.0 -bootstrap-expect {{ consul_bootstrap_expect }} -recursor 8.8.8.8 -recursor 8.8.4.4 {{ consul_opts }}"
+    published_ports:
+      - "{{ consul_bind_ip }}:53:8600/tcp"
+      - "{{ consul_bind_ip }}:53:8600/udp"
+      - "{{ consul_bind_ip }}:8300:8300/tcp"
+      - "{{ consul_bind_ip }}:8301:8301/tcp"
+      - "{{ consul_bind_ip }}:8301:8301/udp"
+      - "{{ consul_bind_ip }}:8302:8302/tcp"
+      - "{{ consul_bind_ip }}:8302:8302/udp"
+      - "{{ consul_bind_ip }}:8400:8400/tcp"
+      - "{{ consul_bind_ip }}:8500:8500/tcp"
+    network_mode: "{{ consul_network_name }}"
+    networks:
+      - name: bridge
+      - name: "{{ consul_network_name }}"
+        ipv4_address: "{{ consul_net_ip }}"
+    env:
+      TZ: "{{ docker_timezone }}"
+      CONSUL_RPC_ADDR: "0.0.0.0:8400"
+      SERVICE_NAME: "consul"
+  become: yes
+  tags:
+      - docker-containers-consul
+
+
+- name: ensure container is started {{ role_comment }}
+  docker_container:
+    name: "{{ docker_container_name }}"
+    image: "{{ docker_image }}{% if docker_image %}:{% endif %}{{ docker_image_tag }}"
+    published_ports: "{{ docker_published_ports }}"
+    volumes: "{{ docker_volumes }}"
+    docker_host: "{{ docker_host }}"
+    env:
+      TZ: "{{ docker_timezone }}"
+      CONSUL_RPC_ADDR: "0.0.0.0:{{ service_consul_https_port }}"
+      SERVICE_NAME: "{{ consul_service_name }}"
+  tags:
+    - docker-container
+
+#- name: update host network iptables {{ role_comment }}
+#  include_role:
+#    name: aem_design.config_iptables
+#  tags:
+#    - host-config

@@ -1,0 +1,5 @@
+---
+
+docker_container_name: "solr01-{{ consul_environment }}"
+
+docker_published_ports: []

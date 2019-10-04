@@ -1,0 +1,17 @@
+---
+
+consul_host: "{{ service_consul_host | default( ansible_host ) }}"
+consul_http_port: "{{ service_consul_http_port | default('8500') }}"
+
+docker_container_name: "registrator"
+docker_image_user: "gliderlabs"
+docker_image_name: "registrator"
+docker_image: "{{ docker_image_user }}/{{ docker_image_name }}"
+docker_image_tag: "latest"
+docker_command: "-internal -resync 60 -cleanup consul://{{ consul_host }}:{{ consul_http_port }}"
+docker_timezone: "Australia/Melbourne"                                                  # timezone
+
+docker_volumes:
+    - "/var/run/docker.sock:/tmp/docker.sock"
+
+docker_host: "unix://var/run/docker.sock"    # host where to run the docker container

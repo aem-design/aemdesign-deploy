@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  author: devops@aem.design
+  description: Creates and mounts an logical volume
+  company: AEM.Design
+  license: Apache
+  min_ansible_version: 2.0
+  platforms:
+  - name: EL
+    versions:
+      - 7
+  categories: system
+dependencies: []
+  

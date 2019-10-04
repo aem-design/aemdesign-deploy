@@ -1,0 +1,6 @@
+---
+
+- name: Cache InfluxDB image in Registry
+  command: docker push {{ docker_registry_hostname }}:{{ docker_registry_port }}/{{ image_influxdb_image_name }}:{{ image_influxdb_image_tag }}
+  tags:
+    - cache-influxdb

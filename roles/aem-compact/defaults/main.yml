@@ -1,0 +1,14 @@
+---
+
+docker_image_user: "{{ global_docker_image_user }}"
+docker_image_name: "oracle-jdk"
+docker_image: "{{ docker_image_user }}/{{ docker_image_name }}"
+docker_image_tag: "{{ global_docker_image_tag }}"
+docker_container_name: "oak_compaction"
+
+installfolder: "/aem"
+aemfolder: "/aem/crx-quickstart"
+oakversion: "1.2.14"
+oakjar: "oak-run-{{ oakversion }}.jar"
+oakrun: "/aem/maintain/{{ oakjar }}"
+jvm_opts: "-Dtar.memoryMapped=true -Xms2g -Xmx2g"

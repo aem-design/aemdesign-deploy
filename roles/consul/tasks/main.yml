@@ -1,0 +1,15 @@
+---
+
+- name: start docker container consul
+  docker_container:
+    name: "{{ docker_container_name }}"
+    image: "{{ docker_image }}:{{ docker_image_tag }}"
+    state: started
+    restart: yes
+    privileged: true
+    published_ports: "{{ docker_published_ports }}"
+    volumes: "{{ docker_volumes }}"
+  become: yes
+  tags:
+    - docker-containers
+    - docker-containers-consul

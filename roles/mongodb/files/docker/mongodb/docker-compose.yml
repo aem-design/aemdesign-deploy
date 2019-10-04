@@ -1,0 +1,12 @@
+mongodb:
+  build: .
+  labels:
+    aem.version: "6.1"
+    os.version: "centos 7"
+    container.description: "MongoDB"
+  container_name: "mongodb"
+  ports:
+   - "27017:27017"
+   - "28017:28017"
+  volumes:
+   - /usr/bin/mongod

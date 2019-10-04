@@ -1,0 +1,50 @@
+---
+
+- set_fact:
+    role_comment: "( common )"
+
+- name: wait for ssh to be available {{ role_comment }}
+  wait_for:
+    host: "{{ inventory_hostname }}"
+    port: "22"
+
+- name: wait for docker to stopped
+  service:
+    name: docker
+    state: stopped
+  become: yes
+  no_log: "{{ debug_hide }}"
+
+- name: makesure docker pid is not present
+  become: yes
+  file:
+    dest: "/var/run/docker.pid"
+    state: absent
+  no_log: "{{ debug_hide }}"
+
+- name: wait for docker to start
+  service:
+    name: docker
+    state: started
+  become: yes
+  no_log: "{{ debug_hide }}"
+
+- name: show docker info {{ role_comment }}
+  script: files/scripts/docker-info.sh
+  become: yes
+  no_log: "{{ debug_hide }}"
+
+- name: show VM diskspace {{ role_comment }}
+  script: files/scripts/disk.sh
+  become: yes
+  no_log: "{{ debug_hide }}"
+
+- name: show VM memory {{ role_comment }}
+  script: files/scripts/memory.sh
+  become: yes
+  no_log: "{{ debug_hide }}"
+
+- name: show VM CPU {{ role_comment }}
+  script: files/scripts/cpu.sh
+  become: yes
+  no_log: "{{ debug_hide }}"

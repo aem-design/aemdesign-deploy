@@ -1,0 +1,8 @@
+---
+
+docker_consul_net_driver: overlay
+consul_environment: uat
+consul_network_name: consul-net
+
+#consul_host: consul.service.dc1.consul
+consul_host: 192.168.27.2

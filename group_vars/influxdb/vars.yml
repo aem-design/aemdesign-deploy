@@ -1,0 +1,20 @@
+---
+# file: group_vars/influxdb
+
+service_influxdb_http_port: 8083
+service_influxdb_direct_port: 8086
+
+container_influxdb_name: "influxdb"
+container_influxdb_port_api: 8086
+container_influxdb_admin_user: "root"
+container_influxdb_influxdb_pwd: "DfEDkdR58NbDXlt8HslH"
+container_influxdb_db_name: "cadvisor"
+
+
+iptable_rules:
+    - port: "22"
+    - port: "161"
+    - port: "8083"
+    - port: "8086"
+
+consul_service_name: "{{ docker_container_name }}"

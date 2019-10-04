@@ -1,0 +1,51 @@
+---
+
+#docker_daemon_template: "atomic.default"
+docker_daemon_template: "default"
+docker_cluster_store: "consul://0.0.0.0:8500"
+
+consul_dns_primary: "{{ dns_primary }}"
+consul_dns_secondary: "{{ dns_secondary }}"
+
+docker_config: "/etc/sysconfig/docker"
+docker_network_config: "/etc/sysconfig/docker-network"
+docker_config_json: "/etc/docker/daemon.json"
+docker_registries_config: "/etc/containers/registries.conf"
+hosts_config: "/etc/hosts"
+
+#docker_registry_host: "{{ docker_registry_address | default('192.168.27.2') }}"                 # registry hostname configured on host in /etc/hosts
+#docker_registry_port: "5000"                                # registry default port
+#docker_registry_mirror_port: "5001"                         # registry default mirror port
+#docker_registry_group_port: "5002"                          # registry default group registry and mirror port configure group nexus
+#docker_registry_url: "http://{{ docker_registry_host }}:{{ docker_registry_port }}"                   #
+#docker_registry_mirror_url: "http://{{ docker_registry_host }}:{{ docker_registry_mirror_port }}"     #default https://registry-1.docker.io
+#docker_registry_group_url: "http://{{ docker_registry_host }}:{{ docker_registry_group_port }}"       #default https://registry-1.docker.io
+
+
+docker_network_overlay_port: 4789
+docker_network_discovery_port: 7946
+
+service_dns_port: 53
+
+iptable_rules:
+#    - port: "{{ docker_network_overlay_port | default('4789') }}"
+#      comment: "docker_network_overlay_port"
+#      protocol: "udp"
+#    - port: "{{ docker_network_discovery_port | default('7946') }}"
+#      comment: "docker_network_discovery_port"
+#    - port: "{{ docker_network_discovery_port | default('7946') }}"
+#      comment: "docker_network_discovery_port_udp"
+#      protocol: "udp"
+#    - port: "{{ service_dns_port | default('53') }}"
+#      comment: "service_dns_port"
+#    - port: "{{ service_dns_port | default('53') }}"
+#      comment: "service_dns_port_udp"
+#      protocol: "udp"
+    - chain: "FORWARD"
+      interface_from: "docker0"
+      interface_to: "eth0"
+      comment: "forward_docker_to_eth"
+    - chain: "FORWARD"
+      interface_from: "eth0"
+      interface_to: "docker0"
+      comment: "forward_eth_to_docker"

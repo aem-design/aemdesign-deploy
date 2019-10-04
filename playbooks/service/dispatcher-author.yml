@@ -1,0 +1,33 @@
+---
+
+- name: author dispatcher playbook
+  hosts: dispatcher
+  vars_files:
+    - "{{inventory_dir}}/../group_vars/all/vars.yml"
+    - "{{inventory_dir}}/../group_vars/dispatcher/vars.yml"
+
+  pre_tasks:
+    - include_role:
+        name: aem_design.docker_available
+    - include_role:
+        name: aem_design.docker_login
+
+  roles:
+    - {
+        role: dispatcher,
+        renderer_port: "{{ service_author_port | default('4502') }}",
+        renderer_host: "{{ service_aem_host | default('192.168.27.2') }}",
+        dispatcher_port: "{{ service_dispatcher_author_port | default('81') }}",
+        dispatcher_https_port: "{{ service_dispatcher_author_https_port | default('444') }}",
+        dispatcher_version: "{{ service_dispatcher_image_tag | default('4.3.2') }}",
+        docker_container_name: "author-dispatcher",
+        docker_volumes: [
+          "author-dispatcher-cache:/data/httpd/cache:z",
+          "author-dispatcher-logs:/data/httpd/logs:z"
+          ],
+        docker_published_ports: [
+          "0.0.0.0:{{ service_dispatcher_author_port }}:8080/tcp",
+          "0.0.0.0:{{ service_dispatcher_author_https_port }}:8443/tcp"
+          ],
+        tags: dispatcher-author
+      }

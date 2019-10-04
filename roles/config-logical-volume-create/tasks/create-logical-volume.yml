@@ -1,0 +1,38 @@
+---
+
+- name: check if device already mounted
+  check_mode: no
+  ignore_errors: True
+  stat:
+    path: "/dev/{{ volume_info.volume_group }}/{{ volume_info.logical_volume }}"
+  register: mount
+  when: volume_info is defined
+  become: yes
+  become_method: sudo
+
+- name: create logical volume
+  lvol:
+    vg: "{{ volume_info.volume_group }}"
+    lv: "{{ volume_info.logical_volume }}"
+    size: "{{ volume_info.size }}"
+  when: not mount.stat.exists and volume_info is defined
+  become: yes
+  become_method: sudo
+
+- name: construct an xfs filesystem
+  filesystem:
+    fstype: xfs
+    dev: "/dev/{{ volume_info.volume_group }}/{{ volume_info.logical_volume }}"
+  when:  not mount.stat.exists and volume_info is defined and volume_info.mapping is defined
+  become: yes
+
+- name: mount logical volumes on boot
+  mount:
+    name: "{{ volume_info.mount_point }}"
+    src: "/dev/mapper/{{ volume_info.mapping }}"
+    fstype: "{{ volume_info.fstype }}"
+    state: mounted
+    opts: defaults,nofail
+  when:  not mount.stat.exists and volume_info is defined and volume_info.mapping is defined
+  become: yes
+  become_method: sudo

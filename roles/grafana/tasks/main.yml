@@ -1,0 +1,28 @@
+---
+
+  - name: Provision Grafana
+    docker:
+      name: "{{ grafana_name }}"
+      image: "{{ grafana_image }}"
+      state: reloaded
+      privileged: true
+      restart_policy: always
+      env:
+        TZ: "{{ docker_timezone }}"
+      links:
+        - "{{ container_influxdb_name }}:influxdb"
+      ports:
+          - "{{ grafana_port }}:3000"
+    tags:
+      - provision
+      - container-grafana
+
+#  - name: 'Ensure Grafana UI is running'
+#    uri: url=http://{{ inventory_hostname }}:{{ grafana.port }}/login timeout=300 return_content=yes
+#    register: result
+#    until: result.content.find("Grafana") != -1
+#    retries: 180
+#    delay: 5
+#    tags:
+#      - provision
+#      - container-grafana

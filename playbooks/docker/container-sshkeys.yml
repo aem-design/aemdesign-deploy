@@ -1,0 +1,16 @@
+---
+# file: docker-container-sshkeys.yml
+- hosts: management
+  vars_files:
+    - "{{inventory_dir}}/../group_vars/all/vars.yml"
+    - "{{inventory_dir}}/../group_vars/management/vars.yml"
+  roles:
+    - common
+    - {
+        role: docker-container-sshkeys,
+        KEYS_TYPE: "full",
+        DOCKER_CONTAINER: gitlab,
+        DOCKER_SSHKEYS_PATH: "{{ container_gitlab.ssh_dest }}",
+        DOCKER_SSHKEYS_USER: "{{ container_gitlab.user }}",
+        DOCKER_SSHKEYS_GROUP: "{{ container_gitlab.group }}"
+      }

@@ -1,0 +1,16 @@
+---
+
+docker_container_name: "author01-{{ consul_environment }}"
+
+# Configures the AEM Publish Replication Agents in /etc/replication/agents.author
+replication_agents:
+  - name: "publish_01"
+    enabled: "true"
+    password: "\\{DES}8aadb625ced91ac483390ebc10640cdf"
+    uri: "http://publish01-{{ consul_environment }}.{{ consul_network_name }}:4503/bin/receive?sling:authRequestLogin=1"
+    user: "admin"
+  - name: "publish_02"
+    enabled: "true"
+    password: "\\{DES}8aadb625ced91ac483390ebc10640cdf"
+    uri: "http://publish02-{{ consul_environment }}.{{ consul_network_name }}:4503/bin/receive?sling:authRequestLogin=1"
+    user: "admin"

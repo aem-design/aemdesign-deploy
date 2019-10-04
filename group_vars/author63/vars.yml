@@ -1,0 +1,137 @@
+---
+# file: group_vars/author
+
+service_aem_version: "6.3.0"
+service_aem_image_tag: "{{ service_aem_version }}"
+service_aem_quickstart_url: "{{ maven_repository_url }}/aemdesign/aem-quickstart/{{ service_aem_version }}/aem-quickstart-{{ service_aem_version }}.jar"
+service_aem_jarfile: "/aem/crx-quickstart/app/cq-quickstart-{{ service_aem_version }}-standalone-quickstart.jar"
+
+
+aem_port: "{{ service_author_port | default('4502') }}"
+aem_debug_port: "{{ service_author_debug_port | default('58242') }}"
+aem_runmode: "{{ service_author_runmode | default('-Dsling.run.modes=author,crx3,crx3tar,nosamplecontent,dynamicmedia') }}"
+aem_jvm_opts: "{{ service_author_jvm_opts | default(service_aem_jvm_opts) }}"
+
+docker_container_name: "author"
+
+consul_service_name: "{{ docker_container_name }}"
+
+docker_volumes: [
+  "author-repository:/aem/crx-quickstart/repository:z",
+  "author-logs:/aem/crx-quickstart/logs:z",
+  "author-backup:/aem/backup:z"
+  ]
+
+docker_published_ports: [
+  "0.0.0.0:{{ aem_port }}:8080/tcp",
+  "0.0.0.0:{{ aem_debug_port }}:58242/tcp"
+  ]
+
+package_files_skip: no
+package_files:
+## SERVICE PACKS
+#  - {
+#      package_source: "adobecloud",
+#      simple_name: "servicepack 1",
+#      file_name: 'AEM-6.3-Service-Pack-1-6.3.1.zip',
+#      file_override: true,
+#      file_override_package_name: 'AEM-6.3-Service-Pack-1',
+#      version: '6.3.1',
+#      group_name: 'adobe/cq630/servicepack',
+#      package_name: 'aem-service-pkg',
+#      requires_restart: false,
+#      requires_admin: true,
+#      package_url: "https://www.adobeaemcloud.com/content/companies/public/adobe/packages/cq630/servicepack/AEM-6.3-Service-Pack-1/jcr%3acontent/package/file.res/AEM-6.3-Service-Pack-1-6.3.1.zip"
+#    }
+  - {
+      package_source: "adobecloud",
+      simple_name: "servicepack 1",
+      file_name: 'AEM-6.3-Service-Pack-2-6.3.2.zip',
+      file_override: true,
+      file_override_package_name: 'AEM-6.3-Service-Pack-2',
+      version: '6.3.2',
+      group_name: 'adobe/cq630/servicepack',
+      package_name: 'aem-service-pkg',
+      requires_restart: false,
+      requires_admin: true,
+      package_url: "https://www.adobeaemcloud.com/content/companies/public/adobe/packages/cq630/servicepack/AEM-6.3.2.0/jcr%3acontent/package/file.res/AEM-6.3.2.0-6.3.2.zip"
+    }
+
+## FORMS
+
+## HOTFIXES
+
+## PACKAGES
+
+  #SP1
+#  - {
+#      package_source: "maven",
+#      simple_name: "adobe commons",
+#      file_name: 'core.wcm.components.all-1.1.0.zip',
+#      version: '1.1.0',
+#      group_name: 'adobe/cq60',
+#      package_name: 'core.wcm.components.all',
+#      requires_restart: false,
+#      requires_admin: false,
+#      package_url: 'https://github.com/Adobe-Marketing-Cloud/aem-core-wcm-components/releases/download/core.wcm.components.reactor-1.1.0/core.wcm.components.all-1.1.0.zip'
+#    }
+  #SP2
+  - {
+      package_source: "maven",
+      simple_name: "adobe commons",
+      file_name: 'core.wcm.components.all-2.0.6.zip',
+      version: '2.0.6',
+      group_name: 'adobe/cq60',
+      package_name: 'core.wcm.components.all',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: 'https://github.com/Adobe-Marketing-Cloud/aem-core-wcm-components/releases/download/core.wcm.components.reactor-2.0.6/core.wcm.components.all-2.0.6.zip'
+    }
+
+
+  - {
+      package_source: "maven",
+      simple_name: "acs twitter",
+      file_name: 'com.adobe.acs.bundles.twitter4j-content-1.0.0.zip',
+      version: '1.0.0',
+      group_name: 'day_internal/consulting',
+      package_name: 'com.adobe.acs.bundles.twitter4j-content',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: 'https://github.com/Adobe-Consulting-Services/com.adobe.acs.bundles.twitter4j/releases/download/com.adobe.acs.bundles.twitter4j-1.0.0/com.adobe.acs.bundles.twitter4j-content-1.0.0.zip'
+    }
+  - {
+      package_source: "maven",
+      simple_name: "acs commons",
+      file_name: 'acs-aem-commons-content-3.15.2.zip',
+      version: '3.15.2',
+      group_name: 'adobe/consulting',
+      package_name: 'acs-aem-commons-content',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: 'https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases/download/acs-aem-commons-3.15.2/acs-aem-commons-content-3.15.2.zip'
+    }
+
+## ASSET SHARE
+#  - {
+#      package_source: "maven",
+#      simple_name: "asset-share-commons.ui.apps",
+#      file_name: 'asset-share-commons.ui.apps-1.1.2.zip',
+#      version: '1.1.2',
+#      group_name: 'asset-share-commons',
+#      package_name: 'assetshare.ui.apps',
+#      requires_restart: false,
+#      requires_admin: false,
+#      package_url: 'https://github.com/Adobe-Marketing-Cloud/asset-share-commons/releases/download/asset-share-commons-1.1.2/asset-share-commons.ui.apps-1.1.2.zip'
+#    }
+#  - {
+#      package_source: "maven",
+#      simple_name: "asset-share-commons.ui.content",
+#      file_name: 'asset-share-commons.ui.content-1.1.2.zip',
+#      version: '1.1.2',
+#      group_name: 'asset-share-commons',
+#      package_name: 'assetshare.ui.content',
+#      requires_restart: false,
+#      requires_admin: false,
+#      package_url: 'https://github.com/Adobe-Marketing-Cloud/asset-share-commons/releases/download/asset-share-commons-1.1.2/asset-share-commons.ui.content-1.1.2.zip'
+#    }

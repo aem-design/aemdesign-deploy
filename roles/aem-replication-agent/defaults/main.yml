@@ -1,0 +1,43 @@
+---
+
+docker_image_user: "{{ global_docker_image_user }}"
+docker_image_name: "aem"
+docker_image: "{{ docker_image_user }}/{{ docker_image_name }}"
+docker_image_tag: "{{ service_author_image_tag }}"
+docker_container_name: "author"
+
+consul_net_ip: 172.10.0.2                                   # Statically assigned IP in the 'consul-net'
+consul_service_ignore: no                                   # Used by registrator to determine if a container should be registered as a service
+
+#specific role param
+aem_port: "{{ service_author_port | default('4502') }}"
+aem_debug_port: "{{ service_author_debug_port | default('58242') }}"
+aem_debug: "{{ service_author_debug | default('no') }}"
+aem_host: "{{ service_author_host | default('192.168.27.2') }}"
+aem_username: "{{ service_author_username | default('admin') }}"
+aem_password: "{{ service_author_password | default('admin') }}"
+aem_runmode: "{{ service_author_runmode | default('nosamplecontent') }}"
+aem_jvm_opts: "{{ service_author_jvmopts | default('-server -Xms1024m -Xmx1024m -XX:MaxDirectMemorySize=256M -XX:+CMSClassUnloadingEnabled -Djava.awt.headless=true') }}"
+aem_start_opts: "{{  default('-nofork') }}"
+aem_quickstart_url: "{{ seerice_author_quickstart_url }}"
+
+docker_published_ports:
+   - "0.0.0.0:{{ aem_port }}:{{ aem_port }}/tcp"
+   - "0.0.0.0:{{ aem_debug_port }}:{{ aem_debug_port }}/tcp"
+docker_volumes:
+  - "author-data-repository:/aem/crx-quickstart/repository:z"
+  - "author-data-logs:/aem/crx-quickstart/logs:z"
+  - "author-data-backup:/aem/backup:z"
+
+dam_package_files: []
+
+# Configures the AEM Publish Replication Agents in /etc/replication/agents.author
+replication_agents: []
+replication_agents_package_name: aem-replication-agents
+replication_agents_package_version: 1.0.0
+
+iptable_rules:
+    - port: "{{ service_author_port | default('8080') }}"
+      comment: "service_author_port"
+    - port: "{{ service_publish_port | default('58242') }}"
+      comment: "service_publish_port"

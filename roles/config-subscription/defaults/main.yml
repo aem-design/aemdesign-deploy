@@ -1,0 +1,4 @@
+---
+
+redhat_network_username: "{{ lookup('env','REDHAT_NETWORK_USERNAME') }}"
+redhat_network_password: "{{ lookup('env','REDHAT_NETWORK_PASSWORD') }}"

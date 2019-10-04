@@ -1,0 +1,18 @@
+---
+# file: operation-backup-aem.yml
+# Example command:
+# ansible-playbook -i inventory/localdev operation-backup-aem.yml --extra-vars="AEM_PORT=4502 AEM_USERNAME=admin AEM_PASSWORD=admin"
+
+- hosts: "{{ hosts|default('dockerhost') }}"
+  vars_files:
+    - "{{inventory_dir}}/../group_vars/all/vars.yml"
+  gather_facts: false
+  become: yes
+  become_method: sudo
+  roles:
+    - {
+        role: docker-backup-aem,
+        AEM_PORT: "{{ service_author_port }}",
+        AEM_USERNAME: "{{ service_author_username }}",
+        AEM_PASSWORD: "{{ service_author_password }}"
+      }

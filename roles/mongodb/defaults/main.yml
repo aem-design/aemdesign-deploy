@@ -1,0 +1,7 @@
+---
+# vars file for .
+
+mongodb_port: 27017
+mongodb_port_web: 28017
+container_mongodb_name: "mongodb"
+container_mongodb_image: "devops/mongodb"

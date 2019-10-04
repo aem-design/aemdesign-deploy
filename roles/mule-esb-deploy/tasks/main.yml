@@ -1,0 +1,26 @@
+---
+- set_fact:
+    role_file_source: "{{ role_path }}/files/"
+    role_comment: "( mule-esb-deploy )"
+
+- name: copy files to server {{ role_comment }}
+  include_role:
+    name: config-copyfiles
+
+- name: copying application package from maven repository {{ role_comment }}
+  maven_artifact:
+    group_id: "{{ maven_group_id }}"
+    artifact_id: "{{ maven_artifact_id }}"
+    repository_url: "{{ maven_url }}"
+    dest: "{{ role_files_dir }}/{{ package_file }}"
+    version: "{{ maven_version }}"
+    extension: "{{ maven_extension }}"
+
+- name: copy application package to container into an applications folder {{ role_comment }}
+  become: yes
+  become_method: sudo
+  shell: docker cp {{role_files_dir}}/{{ package_file }} {{ docker_container_name }}:{{ container_path }}
+
+- name: cleanup files on server {{ role_comment }}
+  include_role:
+    name: config-files-cleanup

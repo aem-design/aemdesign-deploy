@@ -1,0 +1,83 @@
+---
+
+
+  - name: Check if Password Store file exists
+    stat: path={{ docker_host_auth_path }}
+    register: host_auth_home_exists
+    tags:
+      - provision
+      - setup-basicauth
+      - setup-ca
+
+  - name: Set backup Password Store file
+    set_fact:
+      host_auth_backup_file: "{{ docker_host_auth_backup_path }}/{{ docker_host_auth_backup_prefix }}_{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}-old.tgz"
+      host_auth_backup_current_file: "{{ docker_host_auth_backup_path }}/{{ docker_host_auth_backup_prefix }}_{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}-new.tgz"
+    tags:
+      - provision
+      - setup-basicauth
+      - setup-ca
+
+  - name: Backup old Password Store file
+    command: tar --preserve-permissions --remove-files --ignore-command-error -cvf "{{ host_auth_backup_file }}" "{{ docker_host_auth_path }}"
+    register: backup_result
+    when: host_auth_home_exists.stat.exists == True
+    args:
+      creates: "{{ host_auth_backup_file }}"
+    tags:
+      - provision
+      - setup-basicauth
+      - setup-ca
+
+  - name: Set backup file permissions to protect from updates
+    when: not backup_result|skipped
+    file: path="{{ host_auth_backup_file }}" mode=0400
+    tags:
+      - provision
+      - setup-basicauth
+      - setup-ca
+
+
+  - name: Create Password store
+    htpasswd: path={{ docker_host_auth_path }} name={{ item.name }} password={{ item.pass }}
+    with_items:
+      - { name: "{{ docker_host_auth_user }}", pass: "{{ docker_ca_pass }}" }
+    tags:
+      - provision
+      - setup-basicauth
+      - setup-ca
+
+  - name: Backup new Password store
+    command: tar --preserve-permissions -cvf "{{ host_auth_backup_current_file }}" "{{ docker_host_auth_path }}"
+    register: backup_result
+    args:
+      creates: "{{ host_auth_backup_current_file }}"
+    tags:
+      - provision
+      - setup-ca
+
+  - name: Set file permissions to protect from updates
+    when: not backup_result|skipped
+    file:
+      path: "{{ host_auth_backup_current_file }}"
+      mode: 0400
+    tags:
+      - provision
+      - setup-ca
+
+
+  - name: Add paths to server variables
+    lineinfile:
+      dest: "/etc/environment"
+      regexp: "^{{ item.name }}"
+      line: "{{ item.name }}={{ item.value }}"
+    with_items:
+      - { name: "HOST_AUTH", value: "{{ docker_host_auth_path }}" }
+    tags:
+      - provision
+      - setup-basicauth
+      - setup-ca
+
+
+
+

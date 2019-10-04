@@ -1,0 +1,16 @@
+---
+
+docker_host_auth_path: "/root/registry.htpasswd"
+docker_host_auth_user: "admin"
+docker_host_auth_backup_path: "/root"
+docker_host_auth_backup_prefix: "vm-htpasswd"
+docker_ca_path: "/root/ca"
+docker_ca_pass: "27Yn2KDt7C8sc39q3GKb"
+docker_ca_org: "aem.design"
+docker_ca_ou: "dev"
+docker_ca_loc: "AU"
+docker_ca_country: "AU"
+docker_ca_state: "AU"
+docker_ca_backup_path: "/root"
+docker_ca_backup_prefix: "vm-ca"
+docker_config_path: "/root/.docker"

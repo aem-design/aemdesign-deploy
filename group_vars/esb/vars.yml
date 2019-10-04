@@ -1,0 +1,15 @@
+---
+# file: group_vars/esb
+
+
+#api services config
+service_muleesb_port: 8280
+service_muleesb_version: "3.7.0"
+service_muleesb_address: "{{ localdev_address }}"
+
+
+container_esb_host_ip: 0.0.0.0
+container_esb_host_port: 8280
+
+consul_service_name: "{{ docker_container_name }}"
+

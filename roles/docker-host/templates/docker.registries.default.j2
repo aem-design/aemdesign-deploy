@@ -1,0 +1,29 @@
+# /etc/containers/registries.conf
+# /run/containers/registries.conf
+
+# This is a system-wide configuration file used to
+# keep track of registries for various container backends.
+# It adheres to YAML format and does not support recursive
+# lists of registries.
+
+# The default location for this configuration file is /etc/containers/registries.conf.
+
+# The only valid categories are: 'registries', 'insecure_registies',
+# and 'block_registries'.
+
+registries:
+  - docker.io
+
+
+# If you need to access insecure registries, uncomment the section below
+# and add the registries fully-qualified name. An insecure registry is one
+# that does not have a valid SSL certificate or only does HTTP.
+insecure_registries:
+  - {{ docker_registry }}
+  - {{ docker_registry_address }}:{{ docker_registry_mirror_port }}
+  - {{ docker_registry_address }}:{{ docker_registry_group_port }}
+
+# If you need to block pull access from a registry, uncomment the section below
+# and add the registries fully-qualified name.
+#block_registries:
+#  -

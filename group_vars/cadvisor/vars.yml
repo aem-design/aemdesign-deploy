@@ -1,0 +1,11 @@
+---
+# file: group_vars/cadvisor
+
+service_cadvisor_port: 8082
+
+container_cadvisor_influxdb_host: "{{ ansible_host }}"
+
+iptable_rules:
+    - port: "22"
+    - port: "161"
+    - port: "8081"

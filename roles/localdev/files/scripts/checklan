@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# cron script for checking lan connectivity
+
+# Ping count is set aggressively to 1, increase depending what you want.
+PING_COUNT=1
+#I'm assuming ping is installed.
+PING="$(which ping)"
+IP="$(which ip)"
+GREP="$(which grep)"
+CUT="$(which cut)"
+LOGGER="$(which logger)"
+SERVICE=="$(which service)"
+
+#Find the gateway IP address
+GATEWAY_IP="$($IP route | $GREP default | $CUT -d " " -f 3)"
+# ping test
+$PING -n -c "$PING_COUNT" "$GATEWAY_IP" &>/dev/null
+
+if [ "$?" -ge 1 ]
+then
+    # This will log a message in system log (see manpage).
+    $LOGGER "Network access DOWN"
+
+    $SERVICE network restart
+    $LOGGER "service network restart OK"
+
+    if [ -f "/etc/init.d/network" ]; then
+        /etc/init.d/network restart
+    fi
+    $LOGGER "/etc/init.d/network restart OK"
+
+    $SERVICE docker restart
+    $LOGGER "service docker restart OK"
+else
+    $LOGGER "Network access OK"
+fi

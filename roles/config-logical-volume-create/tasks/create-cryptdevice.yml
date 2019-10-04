@@ -1,0 +1,101 @@
+---
+
+- name: crypt upload passphrase file
+  copy: src={{ key_file }} dest={{ key_file_dest }}
+  when: key_file is defined
+  become: yes
+  become_method: sudo
+  tags:
+    - configure-crypt-device
+
+- name: registering logical volume stat info
+  check_mode: no
+  ignore_errors: True
+  stat:
+    path: "/dev/{{ volume_info.volume_group }}/{{ volume_info.logical_volume }}"
+  register: lvst
+  become: yes
+  become_method: sudo
+  tags:
+    - configure-crypt-device
+
+- name: create logical volumes
+  lvol:
+    vg: "{{ volume_info.volume_group }}"
+    lv: "{{ volume_info.logical_volume }}"
+    size: "{{ volume_info.size }}"
+  when: not lvst.stat.exists
+  become: yes
+  become_method: sudo
+  tags:
+   - configure-crypt-device
+
+- name: crypt logical volume
+  command: bash -c 'yes "YES" | cryptsetup luksFormat --key-file={{ key_file_dest }} --cipher={{ cipher }} --hash={{ hash }} --key-size={{ key_size }} /dev/{{ volume_info.volume_group }}/{{ volume_info.logical_volume }}'
+  register: result
+  until: result is success
+  retries: 3
+  delay: 3
+  when: not lvst.stat.exists
+  become: yes
+  become_method: sudo
+  tags:
+    - configure-crypt-device
+
+- name: unlock disk
+  check_mode: no
+  command: cryptsetup luksOpen --key-file={{ key_file_dest }} /dev/{{ volume_info.volume_group }}/{{ volume_info.logical_volume }} {{ volume_info.mapping }}
+  when: >
+    not lvst.stat.exists and
+    volume_info is defined
+  become: yes
+  become_method: sudo
+  tags:
+    - configure-crypt-device
+
+- name: Format lvm volumes... (Only after crypting disk).
+  filesystem:
+    fstype: xfs
+    dev: "/dev/mapper/{{ volume_info.mapping }}"
+  when: >
+    volume_info is defined and
+    lvst.stat.exists == False
+  become: yes
+  become_method: sudo
+  tags:
+    - configure-crypt-device
+
+- name: mount lvm volumes on boot
+## If we don't want add it in fstab, do not use mount module
+  mount:
+    name: "{{ volume_info.mount_point }}"
+    src: "/dev/mapper/{{ volume_info.mapping }}"
+    fstype: "{{ volume_info.fstype }}"
+    state: mounted
+    opts: defaults,nofail
+  when: >
+    volume_info is defined
+  become: yes
+  become_method: sudo
+  tags:
+    - configure-crypt-device
+
+# If we don't want add it in fstab, do not add it in crypttab
+- name: LUKS mapper on boot
+  crypttab:
+    name={{ volume_info.mapping }}
+    backing_device=/dev/{{ volume_info.volume_group }}/{{ volume_info.logical_volume }}
+     password={{ key_file_dest }}
+     state=present
+     opts="luks,timeout=30"
+  become: yes
+  become_method: sudo
+  tags:
+    - configure-crypt-device
+
+## If we don't want add it in fstab, do not keep the passphrase file on server
+#- name: Delete passphrase file on server.
+#  command: shred -u -z -n 128 {{ key_file_dest }}
+#  when: key_file is defined
+#  become: yes
+#  become_method: sudo

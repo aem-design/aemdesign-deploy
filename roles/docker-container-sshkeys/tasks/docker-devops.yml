@@ -1,0 +1,15 @@
+---
+
+#Add devops pub key to the data container so that it can be accessible though ssh
+#for non named user containers add it to the root user
+
+  - name: Copy Keys to container
+    shell:  "docker exec --user={{ DOCKER_SSHKEYS_USER }} {{ DOCKER_CONTAINER }} bash -c \"{{ item }}\""
+    become: yes
+    become_method: sudo
+    with_items:
+      - "mkdir -p {{ DOCKER_SSHKEYS_PATH }}"
+      - "touch {{ DOCKER_AUTHKEYS_PATH }}"
+      - "echo {{ lookup('file', DOCKER_AUTH_KEY_PATH ) }} > {{ DOCKER_AUTHKEYS_PATH }}"
+    tags:
+      - add-sshkey

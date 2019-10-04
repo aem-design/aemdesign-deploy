@@ -1,0 +1,74 @@
+---
+# file: group_vars/all
+
+# ansible_connection: "ssh"
+#ansible_ssh_user: "aemdesign"
+#ansible_ssh_private_key_file: "../aemdesign-vm/keys/current/aemdesign"
+
+
+#global vars - saves having default strings everywhere
+global_timezone: "Australia/Melbourne"
+global_docker_image_user: "aemdesign"
+global_docker_image_tag: "latest"
+
+docker_timezone: "{{ global_timezone }}"
+
+debug_hide: true
+
+localdev_address: "{{ ansible_host | default('192.168.27.2') }}"
+dns_primary: 8.8.8.8                                                           # IP address of the consul DNS. Docker network will be configured to this.
+dns_secondary: 8.8.4.4
+
+
+#registry settings
+#default login based on nexus
+docker_registry_username: "admin"                             # parameter for 'docker login --username'
+docker_registry_password: "admin123"                          # parameter for 'docker login --password'
+docker_registry_email: "devops@aem.design"                    # default email for docker login
+
+#default registry addressing
+docker_registry_address: "{{ localdev_address }}"                     # registry hostname for alias docker_registry_hostname in /etc/hosts
+docker_registry_hostname: "privateregistry"                 # registry alias for docker_registry_address in /etc/hosts
+docker_registry_port: "5000"                                # registry default port
+docker_registry_mirror_port: "5001"                         # registry default mirror port
+docker_registry_group_port: "5002"                          # registry default group registry and mirror port configure group
+
+#this will be configured as insecure registry
+docker_registry: "{{ docker_registry_address }}:{{ docker_registry_port }}"                              # Docker private registry address
+docker_registry_url: "http://{{ docker_registry_address }}:{{ docker_registry_port }}"                   #
+docker_registry_mirror_url: "http://{{ docker_registry_address }}:{{ docker_registry_mirror_port }}"     #default https://registry-1.docker.io
+docker_registry_group_url: "http://{{ docker_registry_address }}:{{ docker_registry_group_port }}"       #default https://registry-1.docker.io
+
+
+#maven
+service_maven_repository_port: 8081
+maven_repository: "{{ docker_registry_address }}:{{ service_maven_repository_port }}"
+maven_repository_repo: "maven-releases"
+maven_repository_url: "http://{{ docker_registry_address }}:{{ service_maven_repository_port }}/repository/{{ maven_repository_repo }}"   # Public Management IP of the Host
+maven_repository_username: "{{ docker_registry_username }}"
+maven_repository_password: "{{ docker_registry_password }}"
+
+#adobe cloud
+service_adobe_cloud_username: "{{ lookup('env','ADOBECLOUD_USERNAME') }}"
+service_adobe_cloud_password: "{{ lookup('env','ADOBECLOUD_PASSWORD') }}"
+
+#aem services config
+service_aem_license_name: "{{ lookup('env','AEM_NAME') }}"
+service_aem_license_key: "{{ lookup('env','AEM_KEY') }}"
+
+service_aem_debug_opts: "-Dcom.sun.management.jmxremote.port={{ service_aem_debug_port }} -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false"
+service_aem_debug: no
+service_aem_host: "{{ localdev_address }}"
+service_aem_jvm_opts: "-server -Xms248m -Xmx1024m -XX:MaxDirectMemorySize=256M -XX:+CMSClassUnloadingEnabled -Djava.awt.headless=true -Dorg.apache.felix.http.host=0.0.0.0"
+
+
+#docker volume
+docker_volume_group: "dockervg"
+docker_volume_size: "10g"
+docker_volume_driver: "local"                                                            # XFS driver
+docker_volume_encrypted: false                                                            # for XFS driver
+docker_volume_mountroot: "/var"                                                           # for XFS driver
+docker_volume_mount_point: "{{ docker_volume_mountroot }}/{{ docker_container_name }}"   # for XFS driver
+docker_volume_logical_volume: "{{ docker_container_name }}"                              # for XFS driver
+
+

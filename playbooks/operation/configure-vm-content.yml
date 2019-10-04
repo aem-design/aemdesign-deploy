@@ -1,0 +1,16 @@
+---
+- name: update content on vm
+  hosts: aemdesign_vm
+  vars_files:
+    - "{{inventory_dir}}/../group_vars/all/vars.yml"
+  pre_tasks:
+    - include_role:
+        name: aem_design.docker_available
+    - include_role:
+        name: aem_design.docker_login
+
+    - name: push images to nexus
+      shell: "docker login -u {{ docker_registry_username }} -p {{ docker_registry_password }} {{ docker_registry }} && docker push {{ docker_registry }}/{{ item.name }}:{{ item.tag }}"
+      become: yes
+      with_items:
+        - { name: "aemdesign/nexus", tag: "latest"}

@@ -1,0 +1,8 @@
+---
+
+- name: extend docker-pool to fill capacity of lvm {{ role_comment }}
+  shell: lvextend -r -l 100%PVS /dev/{{ docker_volume_group }}/docker-pool
+  sudo: yes
+  sudo_user: root
+  tags:
+    - setup-volume-expand

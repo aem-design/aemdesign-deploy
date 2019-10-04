@@ -1,0 +1,34 @@
+---
+
+  - name: Provision cAdvisor
+    docker:
+      name: "{{ container_cadvisor_name }}"
+      image: "{{ container_cadvisor_image }}"
+      state: reloaded
+      privileged: true
+      restart_policy: always
+      command: -storage_driver="{{ container_cadvisor_storage_driver }}"  -storage_driver_db="{{ container_influxdb_db_name }}" -storage_driver_host="{{ container_cadvisor_influxdb_host }}:{{ container_influxdb_port_api }}" -storage_driver_user="{{ container_influxdb_admin_user }}" -storage_driver_password="{{ container_influxdb_influxdb_pwd }}"
+      links:
+        - "{{ container_influxdb_name }}:influxdb"
+      volumes:
+          - "/:/rootfs:ro"
+          - "/var/run:/var/run:z"
+          - "/sys:/sys:ro"
+          - "/var/lib/docker/:/var/lib/docker:ro"
+      ports:
+          - "{{ container_cadvisor_port }}:8080"
+      env:
+        TZ: "{{ docker_timezone }}"
+    tags:
+      - container-cadvisor
+
+#  - name: 'Ensure cAdvisor UI is running'
+#    shell: curl -L --head --silent http://{{ inventory_hostname }}:{{ container_cadvisor_port }}
+#    register: result
+#    until: result.stdout.find("200 OK") != -1
+#    retries: 12
+#    delay: 5
+#    tags:
+#      - container-cadvisor
+
+

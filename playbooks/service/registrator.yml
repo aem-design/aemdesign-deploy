@@ -1,0 +1,73 @@
+---
+
+- name: dam application role
+  hosts: consul-client
+  vars_files:
+    - "{{inventory_dir}}/../group_vars/all/vars.yml"
+    - "{{inventory_dir}}/../group_vars/consul-client/vars.yml"
+
+  pre_tasks: []
+
+  roles: []
+
+  tasks:
+    - name: create docker network
+      docker_network:
+        name: "{{ consul_network_name }}"
+        driver: "{{ docker_consul_net_driver }}"
+        ipam_options: "{{ docker_ipam_options }}"
+      become: yes
+      tags:
+        - docker-network-create
+
+    - name: create config directory
+      file:
+        path="{{ consul_config_path }}/config"
+        state=directory
+      become: yes
+
+    - name: start docker container consul client
+      docker_container:
+        name: "{{ docker_container_name }}"
+        image: "{{ docker_image }}:{{ docker_image_tag }}"
+        state: started
+        recreate: yes
+        restart_policy: unless-stopped
+        volumes: "{{ docker_volumes }}"
+        command: "consul agent -ui -data-dir /consul/data -node {{ consul_bind_ip }} -advertise={{ consul_bind_ip }} -bind=0.0.0.0 -client=0.0.0.0 -join consul.service.dc1.consul"
+        published_ports:
+          - "{{ consul_bind_ip }}:53:8600/tcp"
+          - "{{ consul_bind_ip }}:53:8600/udp"
+          - "{{ consul_bind_ip }}:8300:8300/tcp"
+          - "{{ consul_bind_ip }}:8301:8301/tcp"
+          - "{{ consul_bind_ip }}:8301:8301/udp"
+          - "{{ consul_bind_ip }}:8302:8302/tcp"
+          - "{{ consul_bind_ip }}:8302:8302/udp"
+          - "{{ consul_bind_ip }}:8400:8400/tcp"
+          - "{{ consul_bind_ip }}:8500:8500/tcp"
+        env:
+          TZ: "{{ docker_timezone }}"
+          CONSUL_RPC_ADDR: "0.0.0.0:8400"
+      become: yes
+      tags:
+        - docker-containers-consul-client
+
+    - name: docker run registrator
+      docker_container:
+        name: "registrator_{{ consul_environment }}"
+        image: kidibox/registrator:master
+        state: started
+        restart_policy: unless-stopped
+        recreate: yes
+        privileged: yes
+        command: "-internal -resync 60 consul://{{ consul_host }}:8500"
+        network_mode: "{{ consul_network_name }}"
+        networks:
+          - name: "{{ consul_network_name }}"
+        volumes:
+        - "/var/run/docker.sock:/tmp/docker.sock"
+        env:
+          SERVICE_IGNORE: yes
+      become: yes
+      tags:
+        - docker-containers-registrator

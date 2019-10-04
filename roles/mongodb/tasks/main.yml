@@ -1,0 +1,24 @@
+---
+
+  - name: Provision MongoDB
+    docker:
+      name: "{{ container_mongodb_name }}"
+      image: "{{ container_mongodb_image }}"
+      state: reloaded
+      privileged: true
+      restart_policy: always
+      ports:
+          - "{{ mongodb_port }}:27017"
+          - "{{ mongodb_port_web }}:28017"
+    tags:
+      - container-mongodb
+#
+#  - name: 'Ensure MongoDB UI is running'
+#    shell: curl -L --head --silent http://{{ inventory_hostname }}:{{ mongodb_port_web }}
+#    register: result
+#    until: result.stdout.find("200 OK") != -1
+#    retries: 12
+#    delay: 5
+#    tags:
+#      - container-mongodb
+#

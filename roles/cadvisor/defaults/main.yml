@@ -1,0 +1,17 @@
+---
+
+container_cadvisor_name: "cadvisor"
+container_cadvisor_port: 8081
+container_cadvisor_storage_host: "{{ inventory_hostname }}"
+container_cadvisor_storage_driver: "influxdb"
+container_cadvisor_image: "google/cadvisor"
+
+container_cadvisor_influxdb_host: "{{ inventory_hostname }}"
+
+container_influxdb_name: "influxdb"
+container_influxdb_port_api: 8086
+container_influxdb_admin_user: "root"
+container_influxdb_influxdb_pwd: "root"
+container_influxdb_db_name: "cadvisor"
+
+#container_cadvisor_influxdb_host: "{{ inventory_hostname }}"

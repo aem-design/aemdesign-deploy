@@ -1,0 +1,27 @@
+---
+
+#- name: Register to RedHat Network
+#  redhat_subscription: state=present username={{ redhat_network_username }} password={{ redhat_network_password }} autosubscribe=true
+#  when:
+#    - ansible_distribution == 'RedHat'
+#    - config_subscription_action is defined
+#    - config-subscription == "register"
+
+# TODO: REDHAT
+- name: register to redhat subscription manager
+  redhat_subscription:
+    state: present
+    username: "{{ redhat_network_username }}"
+    password: "{{ redhat_network_password }}"
+    autosubscribe: true
+  register: redhat_register
+  ignore_errors: true
+  changed_when: redhat_register.msg == 'System already registered.' or
+                redhat_register.msg.find('The system has been registered') == 0 or
+                redhat_register.msg.find('System successfully registered') == 0
+  become: yes
+  when:
+    - ansible_distribution == 'RedHat'
+    - config_subscription_action is defined
+    - config-subscription == "register"
+

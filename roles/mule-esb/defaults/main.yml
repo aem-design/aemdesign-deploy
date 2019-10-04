@@ -1,0 +1,24 @@
+---
+
+mule_version: "{{ service_muleesb_version }}"
+mule_port: "{{ service_muleesb_port | default('8280') }}"
+
+docker_image_user: "javastreets"
+docker_image_name: "mule"
+docker_image: "{{ docker_image_user }}/{{ docker_image_name }}"
+docker_image_tag: "{{ service_muleesb_version }}"
+docker_container_name: "muleesb"
+docker_timezone: "Australia/Melbourne"                                                  # timezone
+
+docker_published_ports:
+    - "0.0.0.0:{{ mule_port }}:8081/tcp"
+
+docker_volumes:
+  - "{{ docker_container_name }}-logs:/opt/mule/logs:z"
+  - "{{ docker_container_name }}-conf:/opt/mule/conf:z"
+  - "{{ docker_container_name }}-apps:/opt/mule/apps:z"
+  - "{{ docker_container_name }}-domains:/opt/mule/domains:z"
+
+consul_service_name: "{{ docker_container_name }}"
+
+docker_host: "unix://var/run/docker.sock"    # host where to run the docker container

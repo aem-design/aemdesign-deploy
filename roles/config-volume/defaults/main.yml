@@ -1,0 +1,12 @@
+---
+
+LVG: "{{ docker_volume_group }}"
+LV: registry
+XFS_MAPPING: "registry"
+LVG_MIN_LEFT: 2097152
+LV_MIN_SIZE: 10485760
+LV_EXTEND_SIZE: 2g
+key_file: /root/.cryptsetup_passphrase_tmp
+FSTYPE: xfs
+MOUNT: /var/registry_home
+

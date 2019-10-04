@@ -1,0 +1,21 @@
+---
+
+- include: nexus.yml
+- include: jenkins.yml
+
+#- name: build dispatcher
+#  hosts: jenkins
+#  roles:
+#    - role: dispatcher
+#  tags:
+#    - docker-images-build
+
+
+#- name: build gitlab service
+#  hosts: gitlab
+#  roles:
+#    - role: config-logical-volume-create
+#    - role: gitlab
+#  tags:
+#    - docker-images-build-gitlab
+

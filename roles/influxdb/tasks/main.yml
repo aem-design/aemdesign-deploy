@@ -1,0 +1,13 @@
+---
+
+- include: build-influxdb.yml
+  tags:
+    - build-influxdb
+
+- include: container-influxdb.yml
+  tags:
+    - container-influxdb
+
+- include: cache-influxdb.yml
+  tags:
+    - cache-influxdb

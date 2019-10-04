@@ -1,0 +1,215 @@
+---
+# file: group_vars/publish
+
+service_aem_version: "6.4.0"
+service_aem_image_tag: "{{ service_aem_version }}"
+service_aem_quickstart_url: "{{ maven_repository_url }}/aemdesign/aem-quickstart/{{ service_aem_version }}/aem-quickstart-{{ service_aem_version }}.jar"
+service_aem_jarfile: "/aem/crx-quickstart/app/cq-quickstart-{{ service_aem_version }}-standalone-quickstart.jar"
+
+aem_port: "{{ service_publish_port | default('4503') }}"
+aem_debug_port: "{{ service_publish_debug_port | default('58243') }}"
+aem_runmode: "{{ service_publish_runmode | default('-Dsling.run.modes=publish,crx3,crx3tar,nosamplecontent,dynamicmedia') }}"
+aem_jvm_opts: "{{ service_publish_jvm_opts | default(service_aem_jvm_opts) }}"
+
+docker_container_name: "publish"
+
+consul_service_name: "{{ docker_container_name }}"
+
+docker_volumes: [
+  "publish-repository:/aem/crx-quickstart/repository:z",
+  "publish-logs:/aem/crx-quickstart/logs:z",
+  "publish-backup:/aem/backup:z"
+  ]
+
+docker_published_ports: [
+  "0.0.0.0:{{ aem_port }}:8080/tcp",
+  "0.0.0.0:{{ aem_debug_port }}:58242/tcp"
+  ]
+
+package_files_skip: no
+package_files:
+## SERVICE PACKS
+
+  - {
+      package_source: "adobecloud",
+      simple_name: "adobe servicepack 4",
+      file_name: 'aem-service-pkg-6.4.4.zip',
+      version: '6.4.4',
+      group_name: 'adobe/cq640/servicepack',
+      package_name: 'aem-service-pkg',
+      requires_restart: false,
+      requires_admin: true,
+      package_url: "https://www.adobeaemcloud.com/content/companies/public/adobe/packages/cq640/servicepack/AEM-6.4.4.0/jcr%3acontent/package/file.res/AEM-6.4.4.0-6.4.4.zip"
+    }
+
+## FORMS
+
+  - {
+      package_source: "adobecloud",
+      simple_name: "adobe forms servicepack 4",
+      file_name: 'adobe-aemfd-linux-pkg-5.1.58.zip',
+      version: '5.1.58',
+      group_name: 'day/cq60/fd',
+      package_name: 'adobe-aemfd-linux-pkg',
+      requires_restart: false,
+      requires_admin: true,
+      package_url: "https://www.adobeaemcloud.com/content/companies/public/adobe/packages/cq640/servicepack/fd/AEM-Forms-6.4.4.0-LX/jcr%3acontent/package/file.res/AEM-Forms-6.4.4.0-LX-5.1.58.zip"
+    }
+
+  - {
+      package_source: "adobecloud",
+      simple_name: "AEM 6.4 Compat Pack",
+      file_name: 'adobe-aemfd-compat-pkg-1.0.18.zip',
+      version: '1.0.18',
+      group_name: 'day/cq60/fd',
+      package_name: 'adobe-aemfd-compat-pkg',
+      requires_restart: false,
+      requires_admin: true,
+      package_url: "https://www.adobeaemcloud.com/content/companies/public/adobe/packages/cq640/fd/AEM-FORMS-6.4-COMPAT/jcr%3acontent/package/file.res/AEM-FORMS-6.4-COMPAT-1.0.18.zip"
+    }
+
+
+    ## HOTFIXES
+
+## PACKAGES
+  - {
+      package_source: "maven",
+      simple_name: "acs twitter",
+      file_name: 'com.adobe.acs.bundles.twitter4j-content-1.0.0.zip',
+      version: '1.0.0',
+      group_name: 'day_internal/consulting',
+      package_name: 'com.adobe.acs.bundles.twitter4j-content',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: 'https://github.com/Adobe-Consulting-Services/com.adobe.acs.bundles.twitter4j/releases/download/com.adobe.acs.bundles.twitter4j-1.0.0/com.adobe.acs.bundles.twitter4j-content-1.0.0.zip'
+    }
+  - {
+      package_source: "maven",
+      simple_name: "acs commons",
+      file_name: 'acs-aem-commons-content-4.0.0.zip',
+      version: '4.0.0',
+      group_name: 'adobe/consulting',
+      package_name: 'acs-aem-commons-content',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: 'https://github.com/Adobe-Consulting-Services/acs-aem-commons/releases/download/acs-aem-commons-4.0.0/acs-aem-commons-content-4.0.0.zip'
+    }
+
+  - {
+      package_source: "maven",
+      simple_name: "core.wcm.components.all",
+      file_name: 'core.wcm.components.all-2.3.2.zip',
+      version: '2.3.2',
+      group_name: 'adobe/cq60',
+      package_name: 'core.wcm.components.all',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: 'https://github.com/adobe/aem-core-wcm-components/releases/download/core.wcm.components.reactor-2.3.2/core.wcm.components.all-2.3.2.zip'
+    }
+  - {
+      package_source: "maven",
+      simple_name: "core.wcm.components.extension",
+      file_name: 'core.wcm.components.extension-1.0.12.zip',
+      version: '1.0.12',
+      group_name: 'adobe/cq60',
+      package_name: 'core.wcm.components.extension',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: 'https://github.com/adobe/aem-core-wcm-components/releases/download/core.wcm.components.reactor-2.3.2/core.wcm.components.extension-1.0.12.zip'
+    }
+
+  - {
+      package_source: "maven",
+      simple_name: "accesscontroltool-package",
+      file_name: 'accesscontroltool-package-2.3.2.zip',
+      version: '2.3.2',
+      group_name: 'Netcentric',
+      package_name: 'accesscontroltool-package',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: 'http://repo1.maven.org/maven2/biz/netcentric/cq/tools/accesscontroltool/accesscontroltool-package/2.3.2/accesscontroltool-package-2.3.2.zip'
+    }
+
+  - {
+      package_source: "maven",
+      simple_name: "accesscontroltool-oakindex-package",
+      file_name: 'accesscontroltool-oakindex-package-2.3.2.zip',
+      version: '2.3.2',
+      group_name: 'Netcentric',
+      package_name: 'accesscontroltool-oakindex-package',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: 'http://repo1.maven.org/maven2/biz/netcentric/cq/tools/accesscontroltool/accesscontroltool-oakindex-package/2.3.2/accesscontroltool-oakindex-package-2.3.2.zip'
+    }
+
+#  - {
+#      package_source: "maven",
+#      simple_name: "aem-groovy-console",
+#      file_name: 'aem-groovy-console-13.0.0.zip',
+#      version: '13.0.0',
+#      group_name: 'ICF Olson',
+#      package_name: 'aem-groovy-console',
+#      requires_restart: false,
+#      requires_admin: false,
+#      package_url: 'https://github.com/icfnext/aem-groovy-console/releases/download/13.0.0/aem-groovy-console-13.0.0.zip'
+#    }
+
+  - {
+      package_source: "adobecloud",
+      simple_name: "vanityurls",
+      file_name: 'vanityurls-components-1.0.2.zip',
+      version: '1.0.2',
+      group_name: 'Adobe',
+      package_name: 'vanityurls-components',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: "https://www.adobeaemcloud.com/content/companies/public/adobe/packages/cq600/component/vanityurls-components/jcr%3acontent/package/file.res/vanityurls-components-1.0.2.zip"
+    }
+
+## ASSET SHARE
+#  - {
+#      package_source: "maven",
+#      simple_name: "asset-share-commons.ui.apps",
+#      file_name: 'asset-share-commons.ui.apps-1.6.10.zip',
+#      version: '1.6.10',
+#      group_name: 'asset-share-commons',
+#      package_name: 'assetshare.ui.apps',
+#      requires_restart: false,
+#      requires_admin: false,
+#      package_url: 'https://github.com/Adobe-Marketing-Cloud/asset-share-commons/releases/download/asset-share-commons-1.6.10/asset-share-commons.ui.apps-1.6.10.zip'
+#    }
+#  - {
+#      package_source: "maven",
+#      simple_name: "asset-share-commons.ui.content",
+#      file_name: 'asset-share-commons.ui.content-1.6.10.zip',
+#      version: '1.6.10',
+#      group_name: 'asset-share-commons',
+#      package_name: 'assetshare.ui.content',
+#      requires_restart: false,
+#      requires_admin: false,
+#      package_url: 'https://github.com/Adobe-Marketing-Cloud/asset-share-commons/releases/download/asset-share-commons-1.6.10/asset-share-commons.ui.content-1.6.10.zip'
+#    }
+
+## FEATURE PACKS
+#  - {
+#      package_source: "adobecloud",
+#      simple_name: "featurepack-screens",
+#      file_name: 'cq-6.4.0-featurepack-screens-1.0.364.zip',
+#      version: '1.0.364',
+#      group_name: 'adobe/cq640/featurepack',
+#      package_name: 'cq-6.4.0-featurepack-screens',
+#      requires_restart: false,
+#      requires_admin: false,
+#      package_url: "https://www.adobeaemcloud.com/content/companies/public/adobe/packages/cq640/featurepack/cq-6.4.0-featurepack-screens/jcr%3acontent/package/file.res/cq-6.4.0-featurepack-screens-1.0.364.zip"
+#  }
+#  - {
+#      package_source: "adobecloud",
+#      simple_name: "DynamicMedia-3D",
+#      file_name: 'AEM-6.4-DynamicMedia-3D-3.1.0.zip',
+#      version: '1.0.364',
+#      group_name: 'adobe/cq642/featurepack',
+#      package_name: 'AEM-6.4-DynamicMedia-3D',
+#      requires_restart: false,
+#      requires_admin: false,
+#      package_url: "https://www.adobeaemcloud.com/content/companies/public/adobe/packages/cq640/featurepack/AEM-6.4-DynamicMedia-3D/jcr%3acontent/package/file.res/AEM-6.4-DynamicMedia-3D-3.1.0.zip"
+#  }

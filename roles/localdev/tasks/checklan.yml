@@ -1,0 +1,16 @@
+---
+
+- name: Add check lan
+  copy: src=files/scripts/checklan dest=/root/scripts/checklan owner=root group=root mode="+x"
+
+- name: Add netcheck script
+  copy: src=files/scripts/netcheck dest=/root//scriptsnetcheck owner=root group=root
+
+- name: Make a link to Checklan
+  file: src=/root/scripts/checklan dest=/usr/local/bin/checklan owner=root group=root state=link
+
+- name: Make a link to Netcheck service
+  file: src=/root/scripts/netcheck dest=/etc/cron.d/netcheck owner=root group=root state=link
+
+- name: Retsart Crond
+  service: name=crond state=restarted

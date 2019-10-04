@@ -1,0 +1,36 @@
+---
+
+docker_container_name: consul
+docker_image: consul
+docker_image_tag: 1
+docker_published_ports: []
+docker_volumes: []
+
+
+iptable_rules:
+    - port: "{{ service_consul_dns_port | default('8600') }}"
+      comment: "service_consul_dns_port"
+    - port: "{{ service_consul_dns_port | default('8600') }}"
+      comment: "service_consul_dns_port_udp"
+      protocol: "udp"
+    - port: "{{ service_consul_server_port | default('8300') }}"
+      comment: "service_consul_server_port"
+    - port: "{{ service_consul_serf_lan_port | default('8301') }}"
+      comment: "service_consul_serf_lan_port"
+    - port: "{{ service_consul_serf_lan_port | default('8301') }}"
+      comment: "service_consul_serf_lan_port_udp"
+      protocol: "udp"
+    - port: "{{ service_consul_serf_wan_port | default('8302') }}"
+      comment: "service_consul_serf_wan_port"
+    - port: "{{ service_consul_serf_wan_port | default('8302') }}"
+      comment: "service_consul_serf_wan_port_udp"
+      protocol: "udp"
+    - port: "{{ service_consul_http_port | default('8500') }}"
+      comment: "service_consul_http_port"
+    - port: "{{ service_consul_https_port | default('8400') }}"
+      comment: "service_consul_https_port"
+    - port: "{{ service_consul_advertise_port | default('2375') }}"
+      comment: "service_consul_advertise_port"
+    - port: "{{ service_consul_advertise_port | default('2375') }}"
+      comment: "service_consul_advertise_port_udp"
+      protocol: "udp"

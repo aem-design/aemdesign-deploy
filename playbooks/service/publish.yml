@@ -1,0 +1,33 @@
+---
+
+- name: publish playbook
+  hosts: publish
+  vars_files:
+    - "{{inventory_dir}}/../group_vars/all/vars.yml"
+    - "{{inventory_dir}}/../group_vars/publish/vars.yml"
+
+  pre_tasks:
+    - include_role:
+        name: aem_design.docker_available
+    - include_role:
+        name: aem_design.docker_login
+
+  roles:
+    - {
+        role: aem,
+        aem_port: "{{ service_publish_port | default('4503') }}",
+        aem_runmode: "{{ service_publish_runmode | default('-Dsling.run.modes=publish,crx3,crx3tar,nosamplecontent') }}",
+        aem_jvm_opts: "{{ service_publish_jvm_opts | default(service_aem_jvm_opts) }}",
+        docker_container_name: "publish",
+        docker_volumes: [
+          "publish-repository:/aem/crx-quickstart/repository:z",
+          "publish-logs:/aem/crx-quickstart/logs:z",
+          "publish-backup:/aem/backup:z"
+          ],
+        docker_published_ports: [
+          "0.0.0.0:{{ service_publish_port }}:8080/tcp",
+          "0.0.0.0:{{ service_publish_debug_port }}:58242/tcp",
+          "0.0.0.0:{{ service_publish_imageserver_port }}:57345/tcp"
+          ]
+      }
+

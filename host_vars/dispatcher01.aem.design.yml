@@ -1,0 +1,10 @@
+---
+
+docker_container_name: "dispatcher-author01-{{ consul_environment }}"
+docker_image_tag: 4.1.12
+
+docker_published_ports:
+  - "{{ ansible_host }}:80:8080/tcp"
+  - "{{ ansible_host }}:443:8443/tcp"
+
+volume_info: []

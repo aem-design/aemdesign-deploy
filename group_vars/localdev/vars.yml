@@ -1,0 +1,78 @@
+---
+
+consul_environment: "{{ service_consul_environment }}"
+consul_dns_primary: "{{ service_consul_dns_primary }}"                                                           # IP address of the consul DNS. Docker network will be configured to this.
+consul_dns_secondary: "{{ service_consul_dns_secondary }}"
+consul_network_name: "{{ service_consul_network_name }}"
+
+docker_ipam_options:
+  subnet: '172.10.0.0/16'
+  gateway: '172.10.0.1'
+  iprange: '172.10.1.0/24'
+
+consul_host: 192.168.27.2
+
+
+ssh:
+  private_key: "../../../aemdesign-vm/keys/current/aemdesign"
+  private_key_dest: ".ssh/aemdesign"
+  public_key: "../../../aemdesign-vm/keys/current/aemdesign.pub"
+  public_key_dest: ".ssh/aemdesign.pub"
+  private_dsa_key: "../../../aemdesign-vm/keys/current/id_dsa"
+  private_dsa_key_dest: ".ssh/id_dsa"
+  public_dsa_key: "../../../aemdesign-vm/keys/current/id_dsa.pub"
+  public_dsa_key_dest: ".ssh/id_dsa.pub"
+  authorized_keys_dest: "~/.ssh/authorized_keys"
+  gitlab_private_key: "../../../aemdesign-vm/keys/current/gitlab"
+  gitlab_private_key_dest: ".ssh/gitlab"
+  gitlab_public_key: "../../../aemdesign-vm/keys/current/gitlab.pub"
+  gitlab_public_key_dest: ".ssh/gitlab.pub"
+  gitlab_ssh_config: "../../../aemdesign-vm/keys/gitlab.ssh_config.txt"
+  gitlab_ssh_config_dest: ".ssh/config"
+  devops_public_key: "../../../aemdesign-vm/keys/current/devops.pub"
+  devops_public_key_dest: ".ssh/devops.pub"
+  devops_private_key: "../../../aemdesign-vm/keys/current/devops"
+  devops_private_key_dest: ".ssh/devops"
+  jenkins_public_key: "../../../aemdesign-vm/keys/current/jenkins.pub"
+  jenkins_public_key_dest: ".ssh/jenkins.pub"
+  jenkins_private_key: "../../../aemdesign-vm/keys/current/jenkins"
+  jenkins_private_key_dest: ".ssh/jenkins"
+
+ssh_old:
+  private_key: "../../../aemdesign-vm/keys/old/aemdesign"
+  public_key: "../../../aemdesign-vm/keys/old/aemdesign.pub"
+  gitlab_private_key: "../../../aemdesign-vm/keys/old/gitlab"
+  gitlab_public_key: "../../../aemdesign-vm/keys/old/gitlab.pub"
+  devops_private_key: "../../../aemdesign-vm/keys/old/devops"
+  devops_public_key: "../../../aemdesign-vm/keys/old/devops.pub"
+  jenkins_private_key: "../../../aemdesign-vm/keys/old/jenkins"
+  jenkins_public_key: "../../../aemdesign-vm/keys/old/jenkins.pub"
+
+ssh_container_data:
+  ssh_dest: "/root/.ssh"
+  authorized_keys_dest: "/root/.ssh/authorized_keys"
+  user: "root"
+  group: "root"
+
+ssh_container:
+  dest: "~/.ssh"
+  private_key: "aemdesign-vm/keys/current/aemdesign"
+  public_key: "aemdesign-vm/keys/current/aemdesign.pub"
+  private_dsa_key: "aemdesign-vm/keys/current/id_dsa"
+  public_dsa_key: "aemdesign-vm/keys/current/id_dsa.pub"
+  gitlab_private_key: "aemdesign-vm/keys/current/gitlab"
+  gitlab_public_key: "aemdesign-vm/keys/current/gitlab.pub"
+  devops_private_key: "aemdesign-vm/keys/current/devops"
+  devops_public_key: "aemdesign-vm/keys/current/devops.pub"
+  jenkins_private_key: "aemdesign-vm/keys/current/jenkins"
+  jenkins_public_key: "aemdesign-vm/keys/current/jenkins.pub"
+  authorized_keys_src: "aemdesign-vm/keys/current/authorized_keys"
+
+
+
+localserver:
+  eth0_path: "/etc/sysconfig/network-scripts/ifcfg-eth0"
+  eth1_path: "/etc/sysconfig/network-scripts/ifcfg-eth1"
+  netconfig_path: "/etc/sysconfig/network"
+  eth1_name: "eth1"
+  hostname: "aemdesign"

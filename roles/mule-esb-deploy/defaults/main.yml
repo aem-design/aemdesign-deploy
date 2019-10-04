@@ -1,0 +1,12 @@
+---
+
+package_file: "aemdesign-esb-mule.zip"
+
+maven_package_group_id: "aem-design"
+maven_artifact_id: "aemdesign-esb-mule"
+maven_url: "{{ maven_repository_url }}"
+maven_extension: "zip"
+maven_version: "latest"
+
+container_path: "/opt/mule/apps"
+

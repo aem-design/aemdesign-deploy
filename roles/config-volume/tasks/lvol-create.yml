@@ -1,0 +1,32 @@
+---
+
+# Check if disk is opened/mounted dirty partition
+- name: check if device already mounted
+  always_run: True
+  ignore_errors: True
+  command: bash -c "stat /dev/{{ LVG }}/{{ LV }} > /dev/null; echo $?;"
+  register: already_mounted
+  become: yes
+  become_method: sudo
+
+- name: Create lvm volumes
+  lvol: vg={{ LVG }} lv={{ LV }} size={{ LV_EXTEND_SIZE }}
+  when: already_mounted.stdout != "0"
+  become: yes
+  become_method: sudo
+
+- name: Format lvm volumes... (Only after crypting disk).
+  command: mkfs.xfs /dev/mapper/{{ XFS_MAPPING }}
+  when: >
+    LV is defined and LV and
+    already_mounted.stdout != "0"
+  become: yes
+  become_method: sudo
+
+- name: Mount lvm volumes on boot
+## If we don't want add it in fstab, do not use mount module
+  mount: name={{ MOUNT }} src=/dev/mapper/{{ XFS_MAPPING }} fstype={{ FSTYPE }} state=mounted
+  when: >
+    LV is defined and LV
+  become: yes
+  become_method: sudo

@@ -1,0 +1,40 @@
+---
+
+#  - name: Create InlufxDB Home folder
+#    file: path={{ influxdb.home_path }} state=directory
+#    tags:
+#      - container-influxdb
+
+  - name: Provision InlufxDB
+    docker:
+      name: "{{ container_influxdb_name }}"
+      image: "{{ container_influxdb_image_name }}"
+      state: reloaded
+      privileged: true
+      restart_policy: always
+      env:
+        TZ: "{{ docker_timezone }}"
+        ADMIN_USER: "{{ container_influxdb_admin_user }}"
+        INFLUXDB_INIT_PWD: "{{ container_influxdb_influxdb_pwd }}"
+        PRE_CREATE_DB: "{{ container_influxdb_db_name }}"
+#      volumes:
+#          - "{{ container_influxdb_home_path }}:/data:z"
+      ports:
+          - "{{ container_influxdb_port }}:8083"
+          - "{{ container_influxdb_port_api }}:8086"
+      expose:
+          - "{{ container_influxdb_container_port1 }}"
+          - "{{ container_influxdb_container_port2 }}"
+    tags:
+      - container-influxdb
+
+
+#  - name: 'Ensure InlufxDB UI is running'
+#    shell: curl -L --head --silent http://{{ inventory_hostname }}:{{ influxdb.port }}
+#    register: result
+#    until: result.stdout.find("200 OK") != -1
+#    retries: 12
+#    delay: 5
+#    tags:
+#      - provision
+#      - container-influxdb

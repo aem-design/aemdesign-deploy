@@ -1,0 +1,14 @@
+---
+# file: group_vars/grafana
+
+
+
+service_grafana_port: 3000
+
+
+iptable_rules:
+    - port: "22"
+    - port: "161"
+    - port: "8300"
+
+consul_service_name: "{{ docker_container_name }}"

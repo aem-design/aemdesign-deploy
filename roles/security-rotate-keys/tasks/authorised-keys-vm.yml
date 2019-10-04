@@ -1,0 +1,24 @@
+---
+
+  - name: Add VM Authorized Keys to account
+    lineinfile:
+      dest: "{{ ssh.authorized_keys_dest }}"
+      line: "{{ lookup('file', item ) }}"
+      state: present
+      create: yes
+    with_lines: ls -1 ../aemdesign-vm/keys/current/*.pub
+    tags:
+      - security-rotate-keys
+      - add-allow-servicekeys
+
+
+  - name: Remove VM Authorized Keys
+    lineinfile:
+      dest: "{{ ssh.authorized_keys_dest }}"
+      line: "{{ lookup('file', item ) }}"
+      state: absent
+      create: yes
+    with_lines: ls -1 ../aemdesign-vm/keys/old/*.pub
+    tags:
+      - security-rotate-keys
+      - remove-deny-servicekeys

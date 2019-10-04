@@ -1,0 +1,12 @@
+---
+
+- include: register.yml
+  when:
+    - config_subscription_action is defined
+    - config-subscription == "register"
+
+- include: unregister.yml
+  when:
+    - config_subscription_action is defined
+    - config-subscription == "unregister"
+

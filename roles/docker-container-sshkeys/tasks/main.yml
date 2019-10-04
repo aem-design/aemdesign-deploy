@@ -1,0 +1,12 @@
+---
+
+
+- include: docker-full.yml
+  when: KEYS_TYPE == "full"
+  tags:
+    - docker-container-sshkeys
+
+- include: docker-devops.yml
+  when: KEYS_TYPE == "devops"
+  tags:
+    - docker-container-sshkeys

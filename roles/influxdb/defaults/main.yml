@@ -1,0 +1,32 @@
+---
+# vars file for .
+
+#################
+#IMAGES
+#################
+
+image_influxdb_path: "docker/influxdb/"
+image_influxdb_name: "influxdb"
+image_influxdb_image_name: "devops/influxdb"
+image_influxdb_image_tag: "latest"
+image_influxdb_port: 8083
+image_influxdb_port_api: 8086
+image_influxdb_container_port1: 8090
+image_influxdb_container_port2: 8099
+
+#################
+#CONTAINERS
+#################
+
+container_influxdb_name: "influxdb"
+container_influxdb_home_path: "/var/influxdb_home"
+container_influxdb_url: "/v2/_catalog"
+container_influxdb_image_name: "devops/influxdb"
+container_influxdb_image_tag: "latest"
+container_influxdb_port: 8083
+container_influxdb_port_api: 8086
+container_influxdb_container_port1: 8090
+container_influxdb_container_port2: 8099
+container_influxdb_admin_user: "root"
+container_influxdb_influxdb_pwd: "73hd3h0tC44726W6HG1x"
+container_influxdb_db_name: "cadvisor"

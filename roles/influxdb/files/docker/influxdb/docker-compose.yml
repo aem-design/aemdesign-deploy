@@ -1,0 +1,10 @@
+devops/registry:
+  build: .
+  labels:
+    os.version: "debian"
+    container.description: "docker registry minimal distribution container"
+  container_name: "devops/registry"
+#  volumes:
+#    - /var/lib/registry:/var/lib/registry:rw
+  ports:
+   - "5000:5000"

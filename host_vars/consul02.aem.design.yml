@@ -1,0 +1,6 @@
+---
+
+consul_bind_ip: "{{ ansible_host }}"                        # Host IP to bind consul services
+consul_host: "{{ ansible_host }}"
+
+consul_network_name: consul-net                             # Docker network for consul servers and agents

@@ -1,0 +1,249 @@
+---
+
+- name: Check if CA Home exists
+  stat: path={{ docker_ca_path }}
+  register: ca_home_exists
+  tags:
+    - provision
+    - setup-ca
+
+- name: Set backup CA filename
+  set_fact:
+    ca_backup_file: "{{ docker_ca_backup_path }}/{{ docker_ca_backup_prefix }}_{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}-old.tgz"
+    ca_backup_current_file: "{{ docker_ca_backup_path }}/{{ docker_ca_backup_prefix }}_{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}-new.tgz"
+  tags:
+    - provision
+    - setup-ca
+
+- name: Backup old CA files
+  command: tar --preserve-permissions --remove-files --ignore-command-error -cvf "{{ ca_backup_file }}" -C "{{ docker_ca_path }}" .
+  register: backup_result
+  when: ca_home_exists.stat.isdir is defined and ca_home_exists.stat.isdir
+  args:
+    creates: "{{ ca_backup_file }}"
+  tags:
+    - provision
+    - setup-ca
+
+- name: Set backup file permissions to protect from updates
+  when: not backup_result|skipped
+  file: path="{{ ca_backup_file }}" mode=0400
+  tags:
+    - provision
+    - setup-ca
+
+- name: Create CA Home folder
+  file: path={{ docker_ca_path }} state=directory
+  tags:
+    - provision
+    - setup-ca
+
+
+- name: Generate CA private key
+  command: openssl genrsa -aes256 -passout pass:{{ HOST_PASS }} -out ca-key.pem 4096
+  args:
+    chdir: "{{ docker_ca_path }}"
+  tags:
+    - provision
+    - setup-ca
+
+- name: Generate CA public key
+  command: >
+    openssl req -new -x509 -passin pass:{{ HOST_PASS }} -days 365 -key ca-key.pem -sha256 -out ca.pem
+    -subj "/C={{ HOST_COUNT }}/ST={{ HOST_STATE }}/L={{ HOST_LOC }}/CN={{ HOST_PUBLIC_IP }}/O={{ HOST_ORG }}/OU={{ HOST_OU }}"
+  args:
+    chdir: "{{ docker_ca_path }}"
+  tags:
+    - provision
+    - setup-ca
+
+- name: Create a server key
+  command: openssl genrsa -out server-key.pem 4096
+  args:
+    chdir: "{{ docker_ca_path }}"
+  tags:
+    - provision
+    - setup-ca
+
+- name: Create a server certificate signing request
+  command: openssl req -subj "/CN={{ HOST_PUBLIC_IP }}" -sha256 -new -key server-key.pem -out server.csr
+  args:
+    chdir: "{{ docker_ca_path }}"
+  tags:
+    - provision
+    - setup-ca
+
+
+- name: Create Server CN, specify IP address as well as DNS name for TLS connections
+  lineinfile:
+    dest: "{{ docker_ca_path }}/server-extfile.cnf"
+    regexp: "^"
+    line: "subjectAltName = IP:{{ HOST_PUBLIC_IP }},IP:127.0.0.1"
+    create: True
+  tags:
+    - provision
+    - setup-ca
+
+- name: Create Server Certificate from server certificate signing request
+  command: >
+    openssl x509 -req -days 365 -sha256 -passin pass:{{ HOST_PASS }} -in server.csr -CA ca.pem -CAkey ca-key.pem
+    -CAcreateserial -out server.pem -extfile server-extfile.cnf
+  args:
+    chdir: "{{ docker_ca_path }}"
+  tags:
+    - provision
+    - setup-ca
+
+- name: Create a client key
+  command: openssl genrsa -out key.pem 4096
+  args:
+    chdir: "{{ docker_ca_path }}"
+  tags:
+    - provision
+    - setup-ca
+
+- name: Create a client certificate signing request
+  command: openssl req -subj '/CN={{ HOST_PUBLIC_IP }}' -new -key key.pem -out client.csr
+  args:
+    chdir: "{{ docker_ca_path }}"
+  tags:
+    - provision
+    - setup-ca
+
+- name: Create Client CN, allow for client tand server auth
+  lineinfile:
+    dest: "{{ docker_ca_path }}/client-extfile.cnf"
+    regexp: "^"
+    line: "extendedKeyUsage = clientAuth,serverAuth"
+    create: True
+  tags:
+    - provision
+    - setup-ca
+
+- name: Create Client Certificate from client certificate signing request
+  command: >
+    openssl x509 -req -days 365 -sha256 -passin pass:{{ HOST_PASS }} -in client.csr -CA ca.pem -CAkey ca-key.pem
+    -CAcreateserial -out cert.pem -extfile client-extfile.cnf
+  args:
+    chdir: "{{ docker_ca_path }}"
+  tags:
+    - provision
+    - setup-ca
+
+- name: Create Registry key
+  command: openssl genrsa -out registry.key 2048
+  args:
+    chdir: "{{ docker_ca_path }}"
+  tags:
+    - provision
+    - setup-ca
+
+- name: Create Registry request
+  command: >
+    openssl req -new -key registry.key -out registry.csr
+    -subj "/C={{ HOST_COUNT }}/ST={{ HOST_STATE }}/L={{ HOST_LOC }}/CN={{ HOST_PUBLIC_IP }}/O={{ HOST_ORG }}/OU={{ HOST_OU }}"
+  args:
+    chdir: "{{ docker_ca_path }}"
+  tags:
+    - provision
+    - setup-ca
+
+- name: Sign Registry request
+  command: openssl x509 -req -in registry.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out registry.crt -days 365 -passin pass:{{ HOST_PASS }}
+  args:
+    chdir: "{{ docker_ca_path }}"
+  tags:
+    - provision
+    - setup-ca
+
+
+- name: Clean up request
+  file:
+    dest: "{{ docker_ca_path }}/{{ item }}"
+    state: absent
+  with_items:
+    - "client.csr"
+    - "server.csr"
+  tags:
+    - provision
+    - setup-ca
+
+- name: Protect private keys from public and accidental damage
+  file:
+    dest: "{{ docker_ca_path }}/{{ item }}"
+    mode: 0400
+  with_items:
+    - "ca-key.pem"
+    - "key.pem"
+    - "server-key.pem"
+    - "registry.key"
+  tags:
+    - provision
+    - setup-ca
+
+- name: Protect public keys from accidental damage
+  file:
+    dest: "{{ docker_ca_path }}/{{ item }}"
+    mode: 0444
+  with_items:
+    - "ca.pem"
+    - "server.pem"
+    - "cert.pem"
+  tags:
+    - provision
+    - setup-ca
+
+
+- name: Backup new CA files
+  command: tar --preserve-permissions -cvf "{{ ca_backup_current_file }}" -C "{{ docker_ca_path }}" .
+  register: backup_result
+  args:
+    creates: "{{ ca_backup_current_file }}"
+  tags:
+    - provision
+    - setup-ca
+
+- name: Set file permissions to protect from updates
+  when: not backup_result|skipped
+  file:
+    path: "{{ ca_backup_current_file }}"
+    mode: 0400
+  tags:
+    - provision
+    - setup-ca
+
+
+- name: Make sure docker config path exists
+  file: path={{ docker_config_path }} state=directory
+  tags:
+    - provision
+    - setup-ca
+
+- name: Make links to public certs into docker config
+  file:
+    src: "{{ docker_ca_path }}/{{ item }}"
+    dest: "{{ docker_config_path }}/{{ item }}"
+    state: link
+  with_items:
+    - "ca.pem"
+    - "key.pem"
+    - "cert.pem"
+  tags:
+    - provision
+    - setup-ca
+
+
+- name: Add paths to server variables
+  lineinfile:
+    dest: "/etc/environment"
+    regexp: "^{{ item.name }}"
+    line: "{{ item.name }}={{ item.value }}"
+  with_items:
+    - { name: "CA_PATH", value: "{{ docker_ca_path }}" }
+  tags:
+    - provision
+    - setup-ca
+
+
+
+

@@ -1,0 +1,7 @@
+---
+
+hash: sha256
+cipher: aes-cbc-essiv:sha256
+key_file: disk_passphrase
+key_file_dest: /root/.cryptsetup_passphrase_tmp
+key_size: 256

@@ -1,0 +1,120 @@
+---
+
+- name: Check available volume in the logical volume
+  shell: df | grep {{ XFS_MAPPING }} | awk '{print $4}'
+  register: lv_availableKB
+  always_run: True
+
+#- debug: msg="{{ lv_availableKB.stdout }}"
+
+- name: Check available volume in the volume group
+  shell: vgs --units K | grep {{ LVG }} | awk '{print int(substr($7, 1, length($7)-1))}'
+  register: vg_availableKB
+  always_run: True
+
+- name: Show data
+  shell: "{{ item }}"
+  with_items:
+   - "echo LV available={{ lv_availableKB.stdout }} Min={{ LV_MIN_SIZE }}"
+   - "echo VG available={{ vg_availableKB.stdout }} Min={{ LVG_MIN_LEFT }}"
+  always_run: True
+
+- name: Check if container is running
+  shell: "docker ps | grep '{{ CONTAINER_ID }}$'"
+  register: container_running
+  ignore_errors: true
+  when: >
+    CONTAINER_ID|default("") != ""
+
+- name: Stop AEM container
+  shell: "docker exec {{ CONTAINER_ID }} /aem/crx-quickstart/bin/stop"
+  when: >
+    CONTAINER_ID|default("") != "" and
+    container_running.stdout != "" and
+    lv_availableKB.stdout != "" and
+    {{ LV_LUKS }} == true and
+    lv_availableKB.stdout|int < {{ LV_MIN_SIZE }} and
+    vg_availableKB.stdout|int > {{ LVG_MIN_LEFT }} and
+    ('author' in CONTAINER_ID or 'publish' in CONTAINER_ID)
+
+- name: Stop non-AEM container
+  shell: "docker stop {{ CONTAINER_ID }}"
+  when: >
+    CONTAINER_ID|default("") != "" and
+    container_running.stdout != "" and
+    lv_availableKB.stdout != "" and
+    {{ LV_LUKS }} == true and
+    lv_availableKB.stdout|int < {{ LV_MIN_SIZE }} and
+    vg_availableKB.stdout|int > {{ LVG_MIN_LEFT }} and
+    'author' not in CONTAINER_ID and
+    'publish' not in CONTAINER_ID
+
+- name: Extend non-LUKS logical volume when threshold meet
+  shell: "{{ item }}"
+  with_items:
+   - "lvextend -L +{{ LV_EXTEND_SIZE }} /dev/{{ LVG }}/{{ LV }}"
+   - "xfs_growfs /dev/mapper/{{ XFS_MAPPING }}"
+  when: >
+    lv_availableKB.stdout != "" and
+    {{ LV_LUKS }} == false and
+    lv_availableKB.stdout|int < {{ LV_MIN_SIZE }} and
+    vg_availableKB.stdout|int > {{ LVG_MIN_LEFT }}
+
+- name: Extend encrypted logical volume when threshold meet
+  shell: "{{ item }}"
+  with_items:
+   - "umount /dev/mapper/{{ XFS_MAPPING }}"
+   - "cryptsetup luksClose {{ XFS_MAPPING }}"
+   - "lvextend -L +{{ LV_EXTEND_SIZE }} /dev/{{ LVG }}/{{ LV }}"
+   - "cryptsetup luksOpen --key-file={{ key_file }} /dev/{{ LVG }}/{{ LV }} {{ XFS_MAPPING }}"
+  register: extend_vol
+  until: extend_vol|success
+  retries: 30
+  delay: 10
+  when: >
+    lv_availableKB.stdout != "" and
+    {{ LV_LUKS }} == true and
+    lv_availableKB.stdout|int < {{ LV_MIN_SIZE }} and
+    vg_availableKB.stdout|int > {{ LVG_MIN_LEFT }}
+
+- name: Check if container volume is mounted
+  shell: df | grep {{ XFS_MAPPING }}
+  register: mount_check
+  until: mount_check|success
+  retries: 3
+  delay: 5
+  # grep will exit with 1 when no results found. This causes the task not to halt play.
+  ignore_errors: true
+  when: >
+    lv_availableKB.stdout != "" and
+    {{ LV_LUKS }} == true and
+    lv_availableKB.stdout|int < {{ LV_MIN_SIZE }} and
+    vg_availableKB.stdout|int > {{ LVG_MIN_LEFT }}
+
+- name: Mount container volume
+  mount: name={{ MOUNT_POINT }} src=/dev/mapper/{{ XFS_MAPPING }} fstype={{ FSTYPE }} state=mounted
+  when: >
+    mount_check|failed and
+    lv_availableKB.stdout != "" and
+    {{ LV_LUKS }} == true and
+    lv_availableKB.stdout|int < {{ LV_MIN_SIZE }} and
+    vg_availableKB.stdout|int > {{ LVG_MIN_LEFT }}
+
+- name: Extend encrypted logical volume when threshold meet
+  shell: "{{ item }}"
+  with_items:
+   - "xfs_growfs /dev/mapper/{{ XFS_MAPPING }}"
+  when: >
+    lv_availableKB.stdout != "" and
+    {{ LV_LUKS }} == true and
+    lv_availableKB.stdout|int < {{ LV_MIN_SIZE }} and
+    vg_availableKB.stdout|int > {{ LVG_MIN_LEFT }}
+
+- name: Start container
+  shell: "docker start {{ CONTAINER_ID }}"
+  when: >
+    CONTAINER_ID|default("") != "" and
+    lv_availableKB.stdout != "" and
+    {{ LV_LUKS }} == true and
+    lv_availableKB.stdout|int < {{ LV_MIN_SIZE }} and
+    vg_availableKB.stdout|int > {{ LVG_MIN_LEFT }}

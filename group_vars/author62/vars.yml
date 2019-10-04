@@ -1,0 +1,222 @@
+---
+# file: group_vars/author
+
+service_aem_version: "6.2.0-load21"
+service_aem_image_tag: "{{ service_aem_version }}"
+service_aem_quickstart_url: "{{ maven_repository_url }}/aemdesign/aem-quickstart/{{ service_aem_version }}/aem-quickstart-{{ service_aem_version }}.jar"
+service_aem_jarfile: "/aem/crx-quickstart/app/cq-quickstart-{{ service_aem_version }}-standalone-quickstart.jar"
+
+aem_port: "{{ service_author_port | default('4502') }}"
+aem_debug_port: "{{ service_author_debug_port | default('58242') }}"
+aem_runmode: "{{ service_author_runmode | default('-Dsling.run.modes=author,crx3,crx3tar,nosamplecontent') }}"
+aem_jvm_opts: "{{ service_author_jvm_opts | default(service_aem_jvm_opts) }}"
+
+docker_container_name: "author"
+
+consul_service_name: "{{ docker_container_name }}"
+
+docker_volumes: [
+  "author-repository:/aem/crx-quickstart/repository:z",
+  "author-logs:/aem/crx-quickstart/logs:z",
+  "author-backup:/aem/backup:z"
+  ]
+
+docker_published_ports: [
+  "0.0.0.0:{{ aem_port }}:8080/tcp",
+  "0.0.0.0:{{ aem_debug_port }}:58242/tcp"
+  ]
+
+package_files_skip: no
+package_files:
+## SERVICE PACKS
+  - {
+      package_source: "adobecloud",
+      simple_name: "hotfix-12785 sp1 dep",
+      file_name: 'cq-6.2.0-hotfix-12785-7.0.zip',
+      version: '7.0',
+      group_name: 'adobe/cq620/hotfix',
+      package_name: 'cq-6.2.0-hotfix-12785',
+      requires_restart: true,
+      requires_admin: true,
+      package_url: "https://www.adobeaemcloud.com/content/companies/public/adobe/packages/cq620/hotfix/cq-6.2.0-hotfix-12785/jcr%3acontent/package/file.res/cq-6.2.0-hotfix-12785-7.0.zip"
+    }
+  - {
+      package_source: "adobecloud",
+      simple_name: "servicepack 1",
+      file_name: 'AEM-6.2-Service-Pack-1-6.2.SP1.zip',
+      file_override: true,
+      file_override_package_name: 'AEM-6.2-Service-Pack-1',
+      version: '6.2.SP1',
+      group_name: 'adobe/cq620/servicepack',
+      package_name: 'aem-service-pkg',
+      requires_restart: false,
+      requires_admin: true,
+      package_url: "https://www.adobeaemcloud.com/content/companies/public/adobe/packages/cq620/servicepack/AEM-6.2-Service-Pack-1/jcr%3acontent/package/file.res/AEM-6.2-Service-Pack-1-6.2.SP1.zip"
+    }
+#  - {
+#      package_source: "adobecloud",
+#      simple_name: "servicepack 1 cfp1",
+#      file_name: 'AEM-6.2-SP1-CFP1-1.0.zip',
+#      file_override: true,
+#      file_override_package_name: 'AEM-6.2-SP1-CFP1',
+#      version: '1.0',
+#      group_name: 'adobe/cq620/cumulativefixpack',
+#      package_name: 'cq-6.2.0-sp1-cfp',
+#      requires_restart: false,
+#      requires_admin: true,
+#      package_url: "https://www.adobeaemcloud.com/content/companies/public/adobe/packages/cq620/cumulativefixpack/AEM-6.2-SP1-CFP1/jcr%3acontent/package/file.res/AEM-6.2-SP1-CFP1-1.0.zip"
+#    }
+
+  - {
+      package_source: "adobecloud",
+      simple_name: "servicepack 1 cfp2",
+      file_name: 'AEM-6.2-SP1-CFP2-2.0.zip',
+      file_override: true,
+      file_override_package_name: 'AEM-6.2-SP1-CFP2',
+      version: '2.0',
+      group_name: 'adobe/cq620/cumulativefixpack',
+      package_name: 'cq-6.2.0-sp1-cfp',
+      requires_restart: false,
+      requires_admin: true,
+      package_url: "https://www.adobeaemcloud.com/content/companies/public/adobe/packages/cq620/cumulativefixpack/AEM-6.2-SP1-CFP2/jcr%3acontent/package/file.res/AEM-6.2-SP1-CFP2-2.0.zip"
+    }
+
+## FORMS
+#  - {
+#      package_source: "adobecloud",
+#      simple_name: "aem forms 6.2 sp1",
+#      file_name: 'AEM-Forms-6.2-SP1-LX-3.2.50.zip',
+#      version: '3.2.50',
+#      group_name: 'adobe/cq620/servicepack',
+#      package_name: 'adobe-aemfd-linux-pkg',
+#      requires_restart: true,
+#      requires_admin: true,
+#      package_url: "https://www.adobeaemcloud.com/content/companies/public/adobe/packages/cq620/servicepack/fd/AEM-Forms-6.2-SP1-LX/jcr%3acontent/package/file.res/AEM-Forms-6.2-SP1-LX-3.2.50.zip"
+#    }
+
+#  - {
+#      package_source: "adobecloud",
+#      simple_name: "aem forms 6.2 sp1 cfp1",
+#      file_name: 'AEM-FORMS-6.2-SP1-CFP2-LX-3.2.70.zip',
+#      version: '3.2.70',
+#      group_name: 'adobe/cq620/servicepack',
+#      package_name: 'adobe-aemfd-linux-pkg',
+#      requires_restart: true,
+#      requires_admin: true,
+#      package_url: "https://www.adobeaemcloud.com/content/companies/public/adobe/packages/cq620/cumulativefixpack/fd/AEM-FORMS-6.2-SP1-CFP2-LX/jcr%3acontent/package/file.res/AEM-FORMS-6.2-SP1-CFP1-LX-3.2.70.zip"
+#    }
+
+#  - {
+#      package_source: "adobecloud",
+#      simple_name: "aem forms 6.2 sp1 cfp2",
+#      file_name: 'AEM-FORMS-6.2-SP1-CFP2-LX-3.2.78.zip',
+#      version: '3.2.78',
+#      group_name: 'adobe/cq620/servicepack',
+#      package_name: 'adobe-aemfd-linux-pkg',
+#      requires_restart: true,
+#      requires_admin: true,
+#      package_url: "https://www.adobeaemcloud.com/content/companies/public/adobe/packages/cq620/cumulativefixpack/fd/AEM-FORMS-6.2-SP1-CFP2-LX/jcr%3acontent/package/file.res/AEM-FORMS-6.2-SP1-CFP2-LX-3.2.78.zip"
+#    }
+
+## HOTFIXES
+  - {
+      package_source: "adobecloud",
+      simple_name: "hotfix-15607",
+      file_name: 'cq-6.2.0-hotfix-15607-1.0.zip',
+      version: '1.0',
+      group_name: 'adobe/cq620/hotfix',
+      package_name: 'cq-6.2.0-hotfix-15607',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: "https://www.adobeaemcloud.com/content/companies/public/adobe/packages/cq620/hotfix/cq-6.2.0-hotfix-15607/jcr%3acontent/package/file.res/cq-6.2.0-hotfix-15607-1.0.zip"
+    }
+
+## PACKAGES
+  - {
+      package_source: "maven",
+      simple_name: "acs netty",
+      file_name: 'com.adobe.acs.bundles.netty-1.0.2.zip',
+      version: '1.0.2',
+      group_name: 'adobe/consulting',
+      package_name: 'com.adobe.acs.bundles.netty',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: 'https://repo.adobe.com/nexus/content/repositories/releases/com/adobe/acs/bundles/com.adobe.acs.bundles.netty/1.0.2/com.adobe.acs.bundles.netty-1.0.2.zip'
+    }
+  - {
+      package_source: "maven",
+      simple_name: "acs twitter",
+      file_name: 'com.adobe.acs.bundles.twitter4j-content-1.0.0.zip',
+      version: '1.0.0',
+      group_name: 'day_internal/consulting',
+      package_name: 'com.adobe.acs.bundles.twitter4j-content',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: 'https://repo.adobe.com/nexus/content/groups/public/com/adobe/acs/bundles/com.adobe.acs.bundles.twitter4j-content/1.0.0/com.adobe.acs.bundles.twitter4j-content-1.0.0.zip'
+    }
+  - {
+      package_source: "maven",
+      simple_name: "acs models",
+      file_name: 'com.adobe.acs.bundles.sling-models-1.1.0.zip',
+      version: '1.1.0',
+      group_name: 'adobe/consulting',
+      package_name: 'com.adobe.acs.bundles.sling-models',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: 'https://repo.adobe.com/nexus/content/groups/public/com/adobe/acs/bundles/com.adobe.acs.bundles.sling-models/1.1.0/com.adobe.acs.bundles.sling-models-1.1.0.zip'
+    }
+  - {
+      package_source: "direct",
+      simple_name: "acs healthcheck",
+      file_name: 'com.adobe.acs.bundles.sling-healthcheck-1.0.0.zip',
+      version: '1.0.0',
+      group_name: 'adobe/consulting',
+      package_name: 'com.adobe.acs.bundles.sling-healthcheck',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: 'https://github.com/Adobe-Consulting-Services/com.adobe.acs.bundles.sling-healthcheck/releases/download/com.adobe.acs.bundles.sling-healthcheck-1.0.0/com.adobe.acs.bundles.sling-healthcheck-1.0.0.zip'
+    }
+  - {
+      package_source: "maven",
+      simple_name: "acs tools",
+      file_name: 'acs-aem-tools-content-0.0.50.zip',
+      version: '0.0.50',
+      group_name: 'adobe/consulting',
+      package_name: 'acs-aem-tools-content',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: 'https://repo.adobe.com/nexus/content/groups/public/com/adobe/acs/acs-aem-tools-content/0.0.50/acs-aem-tools-content-0.0.50.zip'
+    }
+  - {
+      package_source: "maven",
+      simple_name: "acs commons",
+      file_name: 'acs-aem-commons-content-3.7.0.zip',
+      version: '3.7.0',
+      group_name: 'adobe/consulting',
+      package_name: 'acs-aem-commons-content',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: 'https://repo.adobe.com/nexus/content/repositories/releases/com/adobe/acs/acs-aem-commons-content/3.7.0/acs-aem-commons-content-3.7.0.zip'
+    }
+  - {
+      package_source: "direct",
+      simple_name: "brightcove",
+      file_name: 'brightcove-all-4.2.0-SNAPSHOT.zip',
+      version: '4.2.0-SNAPSHOT',
+      group_name: 'com.coresecure.brightcove.cq5',
+      package_name: 'brightcove-all',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: 'https://github.com/coresecure/Adobe-CQ5-Brightcove-Connector/releases/download/4.2.0/brightcove-all-4.2.0-SNAPSHOT.zip'
+    }
+  - {
+      package_source: "adobecloud",
+      simple_name: "cameraraw",
+      file_name: 'aem-assets-cameraraw-pkg-1.2.2.zip',
+      version: '1.2.2',
+      group_name: 'aem-assets-cameraraw-pkg-RHEL7-aem62',
+      package_name: 'aem-assets-cameraraw-pkg',
+      requires_restart: false,
+      requires_admin: false,
+      package_url: "https://www.adobeaemcloud.com/content/companies/public/adobe/packages/aem62/product/assets/aem-assets-cameraraw-pkg/jcr%3acontent/package/file.res/aem-assets-cameraraw-pkg-1.2.2.zip"
+    }

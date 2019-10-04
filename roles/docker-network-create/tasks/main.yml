@@ -1,0 +1,7 @@
+---
+
+- name: create docker network
+  docker_network:
+    name: "{{ consul_network_name }}"
+    driver: "{{ docker_consul_net_driver }}"
+    ipam_options: "{{ docker_ipam_options }}"

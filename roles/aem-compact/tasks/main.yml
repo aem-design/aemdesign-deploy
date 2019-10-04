@@ -1,0 +1,85 @@
+---
+
+- name: check role parameters
+  set_fact:
+    oakcompact: yes
+  when:
+    - author_volumes is defined
+    - installfolder is defined
+    - aemfolder is defined
+    - oakversion is defined
+    - oakjar is defined
+    - oakrun is defined
+    - jvm_opts is defined
+
+
+- name: starting oak compaction docker container
+  docker_container:
+    name: "{{ docker_container_name }}"
+    image: "{{ docker_image }}"
+    state: started
+    privileged: true
+    volumes: "{{ author.volumes }}"
+    command: sleep 1d
+  become: yes
+  become_method: sudo
+  when:
+    - oakcompact
+
+- name: register log file name
+  shell: 'date +%Y-%m-%d'
+  register: current_run_timestamp
+  when:
+    - oakcompact
+
+- name: download oak-run jar
+  become: yes
+  become_method: sudo
+  shell: "docker exec oak_compaction bash -c \"{{ item }}\""
+  with_items:
+   - "mkdir -p {{ installfolder }}/maintain/logs"
+   - "curl --output {{ oakrun }} http://central.maven.org/maven2/org/apache/jackrabbit/oak-run/{{ oakversion }}/{{ oakjar }}"
+  when:
+    - oakcompact
+
+- name: Finding old checkpoints
+  become: yes
+  become_method: sudo
+  shell: "docker exec oak_compaction bash -c \"{{ item }}\""
+  with_items:
+   - "java {{ jvm_opts }} -jar {{ oakrun }} checkpoints {{ aemfolder }}/repository/segmentstore >> {{ installfolder }}/maintain/logs/compact-{{ current_run_timestamp.stdout }}.log"
+  when:
+    - oakcompact
+
+- name: Deleting unreferenced checkpoints
+  become: yes
+  become_method: sudo
+  shell: "docker exec oak_compaction bash -c \"{{ item }}\""
+  with_items:
+   - "java {{ jvm_opts }} -jar {{ oakrun }} checkpoints {{ aemfolder }}/repository/segmentstore rm-unreferenced >> {{ installfolder }}/maintain/logs/compact-{{ current_run_timestamp.stdout }}.log"
+  when:
+    - oakcompact
+
+- name: Running compaction
+  become: yes
+  become_method: sudo
+  shell: "docker exec oak_compaction bash -c \"{{ item }}\""
+  with_items:
+   - "java {{ jvm_opts }} -jar {{ oakrun }} compact {{ aemfolder }}/repository/segmentstore >> {{ installfolder }}/maintain/logs/compact-{{ current_run_timestamp.stdout }}.log"
+  when:
+    - oakcompact
+
+- debug:
+    msg: "Compaction complete. Please check the log at: {{ installfolder }}/maintain/logs/compact-{{ current_run_timestamp.stdout }}.log"
+  tags:
+    - oak-compaction
+
+- name: remove oak compaction docker container
+  docker_container:
+    name: oak_compaction
+    state: absent
+  become: yes
+  become_method: sudo
+  when:
+    - oakcompact
+

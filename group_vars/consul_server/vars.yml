@@ -1,0 +1,7 @@
+---
+# file: group_vars/consul-server
+
+#docker_consul_net_driver: bridge
+
+#docker_volumes:
+#  - "consul-data:/consul/data:z"

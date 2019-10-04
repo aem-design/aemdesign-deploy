@@ -1,0 +1,11 @@
+---
+
+- name: removing temp directory {{ role_comment | default('') }}
+  file:
+    name: "{{ mktemp.stdout }}"
+    state: absent
+  become: yes
+  become_method: sudo
+  when:
+    - mktemp is defined
+    - mktemp.stdout is defined

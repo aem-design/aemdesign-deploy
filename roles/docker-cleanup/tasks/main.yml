@@ -1,0 +1,23 @@
+---
+
+- name: Remove Old Containers
+  command: docker rm -v $(docker ps --filter status=exited -q 2>/dev/null) 2>/dev/null
+  tags:
+    - docker-cleanup
+
+- name: Remove Old Images
+  command: docker rmi $(docker images --filter dangling=true -q 2>/dev/null) 2>/dev/null
+  tags:
+    - docker-cleanup
+
+#DOCKER 1.9+
+#- name: Remove Old Volumes
+#  command: docker volume rm $(docker volume ls -qf dangling=true)
+#  tags:
+#    - docker-cleanup
+
+#DOCKER 1.9-
+#- name: Remove Old Volumes
+#  command: docker run -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/docker:/var/lib/docker --rm martin/docker-cleanup-volumes
+#  tags:
+#    - docker-cleanup

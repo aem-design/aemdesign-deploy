@@ -1,0 +1,81 @@
+---
+- name: build nexus service
+  hosts: nexus
+  vars_files:
+    - "{{inventory_dir}}/../group_vars/all/vars.yml"
+    - "{{inventory_dir}}/../group_vars/nexus/vars.yml"
+  pre_tasks:
+    - include_role:
+        name: aem_design.docker_available
+    - include_role:
+        name: aem_design.docker_login
+#    - include_role:
+#        name: centos-tini
+#    - include_role:
+#        name: oracle-jdk
+  roles:
+    - role: nexus
+    - {
+        role: nexus-api,
+        api_action: "createrepo",
+        repo_check_url: "http://{{ nexus_host }}:{{ docker_registry_port | default('5000') }}/v1/_ping",
+        body: {
+          "action": "coreui_Repository",
+          "method": "create",
+          "data": [
+            {
+              "attributes": {
+                "docker": {
+                  "httpPort": "{{ docker_registry_port | default('5000') }}",
+                  "v1Enabled": true
+                },
+                "storage": {
+                  "blobStoreName": "default",
+                  "strictContentTypeValidation": true,
+                  "writePolicy": "ALLOW"
+                }
+              },
+              "name": "privateregistry",
+              "format": "",
+              "type": "",
+              "url": "",
+              "online": true,
+              "checkbox-1361-inputEl": true,
+              "checkbox-1364-inputEl": false,
+              "recipe": "docker-hosted"
+            }
+          ],
+          "type": "rpc",
+          "tid": 22
+        }
+      }
+    - {
+        role: nexus-api,
+        api_action: "updaterepo",
+        body: {
+          "action": "coreui_Repository",
+          "method": "update",
+          "data": [
+            {
+              "attributes": {
+                "maven": {
+                  "versionPolicy":"RELEASE",
+                  "layoutPolicy":"PERMISSIVE"
+                  },
+                "storage": {
+                  "blobStoreName":"default",
+                  "strictContentTypeValidation":false,
+                  "writePolicy":"ALLOW_ONCE"
+                  }
+              },
+              "name": "maven-releases",
+              "format": "maven2",
+              "type": "hosted",
+              "url": "http://{{ service_nexus_address | default('192.168.27.2')}}:{{ service_nexus_port | default('8081') }}/repository/maven-releases/",
+              "online": true,
+            }
+          ],
+          "type": "rpc",
+          "tid": 18
+        }
+      }

@@ -1,0 +1,17 @@
+---
+# file: group_vars/solr
+
+
+#management services config
+service_solr_address: "{{ localdev_address }}"
+service_solr_version: "7.3.0"
+service_solr_port: 8983
+service_zookeeper_address: "{{ localdev_address }}"
+service_zookeeper_port: 9983
+
+
+container_solr_name: "{{ docker_container_name }}"
+container_solr_host_ip: 0.0.0.0
+container_solr_host_port: 8983
+
+consul_service_name: "{{ docker_container_name }}"

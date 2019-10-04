@@ -1,0 +1,12 @@
+---
+
+- name: solr cloud docker build
+  hosts: solr
+  vars_files:
+    - "{{inventory_dir}}/../group_vars/all/vars.yml"
+    - "{{inventory_dir}}/../group_vars/solr/vars.yml"
+  pre_tasks:
+  roles:
+    - role: solr-cloud
+  tasks:
+  handlers:

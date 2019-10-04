@@ -1,0 +1,12 @@
+---
+#- include: roles/common/tasks/system-info.yml
+
+- include: authorised-keys-vm.yml
+  tags:
+    - security-rotate-keys
+
+- include: authorised-keys-user.yml
+  tags:
+    - security-rotate-keys
+
+

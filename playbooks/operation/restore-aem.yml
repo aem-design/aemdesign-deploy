@@ -1,0 +1,17 @@
+---
+# file: operation-restore-aem.yml
+# Example command:
+# ansible-playbook -i inventory/localdev operation-restore-aem.yml --extra-vars="CONTAINER_ID=publish CONTAINER_AEM_HOME_PATH=/var/publish_home"
+
+- hosts: "{{ hosts|default('dockerhost') }}"
+  vars_files:
+    - "{{inventory_dir}}/../group_vars/all/vars.yml"
+  gather_facts: false
+  become: yes
+  become_method: sudo
+  roles:
+    - {
+        role: docker-restore-aem,
+        CONTAINER_ID: "author",
+        CONTAINER_AEM_HOME_PATH: "/var/author_home"
+      }

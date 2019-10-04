@@ -1,0 +1,14 @@
+---
+# file: group_vars/dispatcher
+
+
+service_dispatcher_image_tag: "4.3.2"
+service_dispatcher_port: 80
+service_dispatcher_https_port: 443
+
+service_dispatcher_author_port: 81
+service_dispatcher_author_https_port: 444
+service_dispatcher_publish_port: "{{ service_dispatcher_port }}"
+service_dispatcher_publish_https_port: "{{ service_dispatcher_https_port }}"
+
+

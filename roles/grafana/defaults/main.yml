@@ -1,0 +1,8 @@
+---
+# vars file for .
+
+grafana_port: 8300
+grafana_image: "grafana/grafana:develop"
+grafana_name: "grafana"
+
+container_influxdb_name: "influxdb"

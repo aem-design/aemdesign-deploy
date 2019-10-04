@@ -1,0 +1,17 @@
+---
+
+- name: create logical volume
+  include: create-logical-volume.yml
+  static: no
+  when: volume_info.is_encrypted is defined and
+        not volume_info.is_encrypted
+  tags:
+    - create-logical-volume
+
+- name: create crypted device
+  include: create-cryptdevice.yml
+  static: no
+  when: volume_info.is_encrypted is defined and
+        volume_info.is_encrypted
+  tags:
+    - create-logical-volume

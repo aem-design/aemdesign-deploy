@@ -1,0 +1,15 @@
+# from galaxy
+- src: aem_design.aem
+- src: aem_design.aem_license
+- src: aem_design.aem_package
+- src: aem_design.aem_security_test
+- src: aem_design.aem_toughday
+- src: aem_design.aem_verify
+- src: aem_design.dispatcher
+- src: aem_design.docker_available
+- src: aem_design.docker_login
+- src: aem_design.jenkins
+- src: aem_design.nexus
+- src: aem_design.nexus-api
+- src: aem_design.selenium_grid
+- src: aem_design.selenium_grid_node

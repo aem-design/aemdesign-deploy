@@ -1,0 +1,4 @@
+# /etc/sysconfig/docker-network
+# Managed by Ansible.
+
+DOCKER_NETWORK_OPTIONS="--dns {{ consul_dns_primary }} --dns {{ consul_dns_secondary }}"

@@ -1,0 +1,6 @@
+---
+# file: group_vars/nexus
+
+service_nexus_port: "8081"
+
+consul_service_name: "{{ docker_container_name }}"

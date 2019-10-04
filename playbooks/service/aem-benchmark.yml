@@ -1,0 +1,12 @@
+---
+
+- name: simulates load to author
+  hosts: toughday
+  vars_files:
+    - "{{inventory_dir}}/../group_vars/all/vars.yml"
+    - "{{inventory_dir}}/../group_vars/toughday/vars.yml"
+
+  roles:
+    - role: aem_design.aem_toughday
+  tags:
+    - docker-containers-toughday

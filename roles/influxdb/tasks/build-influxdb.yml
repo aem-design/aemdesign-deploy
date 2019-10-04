@@ -1,0 +1,18 @@
+---
+
+- name: Remove InlufxDB tag for Registry image
+  command: docker rmi {{ docker_registry_hostname }}:{{ docker_registry_port }}/{{ image_influxdb_image_name }}:{{ image_influxdb_image_tag }}
+  ignore_errors: yes
+  tags:
+    - build-influxdb
+
+- name: Build InlufxDB without Volumes
+  docker_image: path="{{ git.docker_dest }}/{{ image_influxdb_name }}" name="{{ image_influxdb_image_name }}" tag="{{ image_influxdb_image_tag }}" state=build
+  tags:
+    - build-influxdb
+
+- name: Tag InlufxDB image for Private Registry
+  command: docker tag {{ image_influxdb_image_name }} {{ docker_registry_hostname }}:{{ docker_registry_port }}/{{ image_influxdb_image_name }}:{{ image_influxdb_image_tag }}
+  tags:
+    - build-influxdb
+

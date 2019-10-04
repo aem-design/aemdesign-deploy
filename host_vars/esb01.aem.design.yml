@@ -1,0 +1,9 @@
+---
+
+docker_container_name: "esb01-{{ consul_environment }}"
+
+docker_networks:
+  - name: "{{ consul_network_name }}"
+
+docker_published_ports:
+  - "{{ ansible_host }}:8280:8080/tcp"

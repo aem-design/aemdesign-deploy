@@ -1,0 +1,84 @@
+---
+
+- name: remove container
+  docker_container:
+    name: "{{ docker_container_name }}"
+    state: absent
+    privileged: true
+    keep_volumes: false
+  become: yes
+
+- name: checking mount point status
+  check_mode: no
+  ignore_errors: true
+  stat:
+    path: "{{ volume_info.mount_point }}"
+  register: mount_status
+  become: yes
+  become_method: sudo
+
+- name: unmount lvm volumes on boot
+  mount:
+    name: "{{ volume_info.mount_point }}"
+    state: absent
+  when: >
+    mount_status.stat.exists and
+    volume_info is defined
+  become: yes
+  become_method: sudo
+
+- name: upload passphrase file
+  copy: src={{ key_file }} dest={{ key_file_dest }}
+  when: >
+    key_file is defined
+  become: yes
+  become_method: sudo
+
+- name: checking crypt status
+  command: cryptsetup status {{ volume_info.mapping }}
+  ignore_errors: true
+  register: stat_crypt
+  become: yes
+
+- name: cryptsetup close mapping
+  command: cryptsetup close {{ volume_info.mapping }}
+  when: stat_crypt.stdout != "[Errno 2] No such file or directory" and
+        not "is inactive." in stat_crypt.stdout
+  become: yes
+  become_method: sudo
+
+- name: remove luks mapper on boot
+  crypttab:
+    name: "{{ volume_info.mapping }}"
+    backing_device: "/dev/{{ volume_info.volume_group }}/{{ volume_info.logical_volume }}"
+    password: "{{ key_file_dest }}"
+    state: absent
+  when: stat_crypt.stdout != "[Errno 2] No such file or directory" and
+        not "is inactive." in stat_crypt.stdout
+  become: yes
+  become_method: sudo
+
+- name: clean up crypttab
+  shell: sed '/^$/d' -i /etc/crypttab
+  become: yes
+  become_method: sudo
+
+- name: checking logical volume status
+  check_mode: no
+  ignore_errors: true
+  stat:
+    path: /dev/{{ volume_info.volume_group }}/{{ volume_info.logical_volume }}
+  register: lv_stat
+  become: yes
+  become_method: sudo
+
+- name: remove logical volume
+  lvol:
+    vg: "{{ volume_info.volume_group }}"
+    lv: "{{ volume_info.logical_volume }}"
+    state: absent
+    force: yes
+  when: >
+    lv_stat.stat.exists
+  become: yes
+  become_method: sudo

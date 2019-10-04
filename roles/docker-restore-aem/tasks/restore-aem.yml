@@ -1,0 +1,44 @@
+---
+
+- name: Check AEM Role
+  shell: "docker inspect --format='{{ '{{' }}range .Config.Env{{ '}}' }}{{ '{{' }}println .{{ '}}' }}{{ '{{' }}end{{ '}}' }}' {{ CONTAINER_ID }}|grep 'CQ_RUNMODE.*publish'"
+  register: publish_role
+  ignore_errors: true
+  become: yes
+  become_method: sudo
+
+- name: Stop container
+  include: ../../docker-command/tasks/main.yml COMMAND="stop" CONTAINER_ID={{ CONTAINER_ID }}
+  become: yes
+  become_method: sudo
+
+- name: Clean up AEM volume
+  file: path={{ CONTAINER_AEM_HOME_PATH }}/aem/crx-quickstart/ state=absent
+  become: yes
+  become_method: sudo
+
+- name: Restore Author Volume
+  shell: "cp -r {{ CONTAINER_AEM_HOME_PATH }}/backup/daily/crx-quickstart/ {{ CONTAINER_AEM_HOME_PATH }}/aem/"
+  when: >
+    (publish_role|failed)
+  become: yes
+  become_method: sudo
+
+- name: Restore Publish Volume
+  unarchive: src={{ CONTAINER_AEM_HOME_PATH }}/backup/daily.zip dest={{ CONTAINER_AEM_HOME_PATH }}/aem/ remote_src=yes
+  when: >
+    (publish_role|success)
+  become: yes
+  become_method: sudo
+
+- name: Start container
+  include: ../../docker-command/tasks/main.yml COMMAND="start" CONTAINER_ID={{ CONTAINER_ID }}
+  become: yes
+  become_method: sudo
+
+- name: Configure binary files permission
+  shell: "{{ item }}"
+  with_items:
+    - "docker exec {{ CONTAINER_ID }} chmod 744 -R /aem/crx-quickstart/bin/ /aem/crx-quickstart/monitoring/"
+  become: yes
+  become_method: sudo

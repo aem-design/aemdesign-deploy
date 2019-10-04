@@ -1,0 +1,3 @@
+df -h
+
+lsblk

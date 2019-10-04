@@ -1,0 +1,15 @@
+---
+## file: site.yml
+## This playbook deploys dev quickstart application stack.
+
+- name: site deploy
+  hosts: localdev
+
+
+- import_playbook: playbooks/service/author.yml
+
+#- import_playbook: playbooks/service/author.yml
+#- import_playbook: playbooks/service/publish.yml
+#- import_playbook: playbooks/service/dispatcher-publish.yml
+#- import_playbook: playbooks/service/selenium-grid.yml
+#- import_playbook: playbooks/service/selenium-grid-node-chrome.yml

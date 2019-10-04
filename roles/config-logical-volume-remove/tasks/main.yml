@@ -1,0 +1,17 @@
+---
+
+- name: remove logical volume
+  include: remove-logical-volume.yml
+  static: no
+  when: volume_info.is_encrypted is defined and
+        not volume_info.is_encrypted
+  tags:
+    - remove-logical-volume
+
+- name: remove logical volume
+  include: remove-cryptdevice.yml
+  static: no
+  when: volume_info.is_encrypted is defined and
+        volume_info.is_encrypted
+  tags:
+    - remove-logical-volume

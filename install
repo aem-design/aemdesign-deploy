@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+if [ ! -z "$PYTHON_ENV" ]; then
+    echo "Python virtual environment detected, activating: $PYTHON_ENV"
+    source "${VIRTUALENVWRAPPER}"
+    workon "$PYTHON_ENV"
+fi
+
+function lowercase() {
+    #echo "$1" | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/"
+    echo "$1" | awk '{print tolower($0)}'
+}
+
+OS=$(lowercase "$(uname -a | grep Microsoft -q && echo windowsnt || uname)")
+
+echo "OS=${OS}"
+
+if [[ "$OS" == "windowsnt" || "$OS" == *"mingw"* || "$OS" == *"cygwin"*  ]]; then
+
+    make pydeps
+
+else
+    mvn clean install -Pdependencies
+fi
+
+CHECK_PYAEM=$(python -c 'import pyaem; print(pyaem.__version__)')
+echo "CHECK_PYAEM=${CHECK_PYAEM}"

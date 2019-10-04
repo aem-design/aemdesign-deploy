@@ -1,0 +1,23 @@
+---
+
+- name: create temp directory on remote host {{ role_comment | default('') }}
+  shell: "mktemp -d"
+  no_log: "{{ debug_hide }}"
+  register: mktemp
+
+- name: set remote host directory for role files {{ role_comment | default('') }}
+  set_fact:
+    role_files_dir: "{{ mktemp.stdout }}"
+
+- name: copy files specified by role {{ role_comment | default('') }}
+  debug:
+    msg:
+        - "from: {{ role_file_source }}"
+        - "to: {{ role_files_dir }}"
+  no_log: "{{ debug_hide }}"
+
+- name: copy files to remote {{ role_comment | default('') }}
+  synchronize:
+    src: "{{ role_file_source }}"
+    dest: "{{ role_files_dir }}"
+  no_log: "{{ debug_hide }}"
