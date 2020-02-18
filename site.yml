@@ -3,25 +3,25 @@
 ## This playbook deploys the whole application stack.
 
 - name: site deploy
-  hosts: docker_host
-  pre_tasks:
-    - include_role:
-        name: aem_design.docker_available
-    - include_role:
-        name: aem_design.docker_login
+  hosts: all
+#  pre_tasks:
+#    - include_role:
+#        name: aem_design.docker_available
+#    - include_role:
+#        name: aem_design.docker_login
 
 #- include: playbooks/service/consul.yml
 #- include: playbooks/service/registrator.yml
 
-- import_playbook: playbooks/service/nexus.yml
-- import_playbook: playbooks/service/jenkins.yml
+#- import_playbook: playbooks/service/nexus.yml
+#- import_playbook: playbooks/service/jenkins.yml
 - import_playbook: playbooks/service/author.yml
-- import_playbook: playbooks/service/publish.yml
-- import_playbook: playbooks/service/dispatcher-author.yml
-- import_playbook: playbooks/service/dispatcher-publish.yml
-- import_playbook: playbooks/service/selenium-grid.yml
-- import_playbook: playbooks/service/selenium-grid-node-chrome.yml
-- import_playbook: playbooks/service/selenium-grid-node-firefox.yml
+#- import_playbook: playbooks/service/publish.yml
+#- import_playbook: playbooks/service/dispatcher-author.yml
+#- import_playbook: playbooks/service/dispatcher-publish.yml
+#- import_playbook: playbooks/service/selenium-grid.yml
+#- import_playbook: playbooks/service/selenium-grid-node-chrome.yml
+#- import_playbook: playbooks/service/selenium-grid-node-firefox.yml
 
 
 ###
