@@ -16,7 +16,7 @@ CURRDIR="$(pwd)"
 ANSIBLEPLAYBOOK=$(which ansible-playbook)
 ANSIBLE=$(which ansible)
 ANSIBLE_PLAYBOOK="site.yml"
-ANSIBLE_INVENTORY="inventory/localdev"
+ANSIBLE_INVENTORY="inventory/localdev.yml"
 echo PARAMS="$@"
 echo CURRDIR=$CURRDIR
 cd $CURRDIR
