@@ -10,6 +10,6 @@
 - src: aem_design.docker_login
 - src: aem_design.jenkins
 - src: aem_design.nexus
-- src: aem_design.nexus-api
+- src: aem_design.nexus_api
 - src: aem_design.selenium_grid
 - src: aem_design.selenium_grid_node
